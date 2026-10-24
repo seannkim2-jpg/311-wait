@@ -32,6 +32,7 @@ export function CaseLookup() {
     if (!id) {
       setError('Enter the case number as BCS- followed by 8 digits, for example BCS-00253943.')
       setResult(null)
+      setStatus('')
       inputRef.current?.focus()
       return
     }

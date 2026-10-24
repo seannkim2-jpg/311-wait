@@ -140,13 +140,16 @@ and clean-checkout test fixes ([PR #5](https://github.com/seannkim2-jpg/311-wait
 
 ## Submission checklist
 
-- [ ] Repo is **public**
-- [ ] `/.kiro` committed at the root, with real specs, steering, and hooks in it
-- [ ] Challenge track identified above
-- [ ] Text description of features and functionality
+Form-ready text, testing steps and a video plan: [`docs/SUBMISSION.md`](docs/SUBMISSION.md).
+
+
+- [x] Repo is **public**
+- [x] `/.kiro` committed at the root, with real specs, steering, and hooks in it
+- [x] Challenge track identified above
+- [x] Text description of features and functionality
 - [ ] Demo video under 3 minutes, public on YouTube/Vimeo/Facebook/Youku, no third-party
       trademarks or copyrighted music
-- [ ] Live demo, test build, or hosted URL a judge can reach free of charge
-- [ ] Testing instructions, including credentials if anything is gated
-- [ ] `docs/KIRO-USAGE.md` write-up complete
+- [x] Live demo, test build, or hosted URL a judge can reach free of charge
+- [x] Testing instructions, including credentials if anything is gated
+- [x] `docs/KIRO-USAGE.md` write-up complete
 - [ ] All team members added on the hackathon site (max 4)
