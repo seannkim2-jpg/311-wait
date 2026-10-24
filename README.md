@@ -1,8 +1,8 @@
-# Hackachusetts entry
+# Wait Audit
 
 > **Track:** Civic Action
 >
-> **Project:** Wait Audit
+> **Live demo:** [wait-audit-livid.vercel.app](https://wait-audit-livid.vercel.app/)
 
 ## What it does
 
@@ -26,8 +26,12 @@ than `Resolved`.
 It makes no causal claim about why. It audits the measurement, shows its sample sizes,
 censoring counts and confidence intervals, and says where the data cannot answer.
 
+These figures describe cases opened since July 1, 2026, at the October 24, 2026, 09:01 UTC
+data extract cutoff. The site queries the current dataset when opened, so its numbers may
+differ. [`docs/research/NUMBERS.md`](docs/research/NUMBERS.md) records the snapshot and method.
+
 - [`docs/ANALYSIS.md`](docs/ANALYSIS.md) — method, results, limitations
-- [`docs/research/NUMBERS.md`](docs/research/NUMBERS.md) / [`data/numbers.json`](data/numbers.json) — every current figure, generated
+- [`docs/research/NUMBERS.md`](docs/research/NUMBERS.md) / [`data/numbers.json`](data/numbers.json) — generated snapshot figures
 - [`docs/research/claim-check.md`](docs/research/claim-check.md) — what the city does and doesn't document
 - [`docs/ROADMAP.md`](docs/ROADMAP.md) — status and what to build on
 - [`docs/UI-DESIGN.md`](docs/UI-DESIGN.md) — interface brief
@@ -38,7 +42,7 @@ censoring counts and confidence intervals, and says where the data cannot answer
 
 ```bash
 git clone https://github.com/seannkim2-jpg/kiro-hackachusetts.git
-cd kiro-hackachusetts && npm install
+cd kiro-hackachusetts && npm ci
 kiro .            # IDE, or:
 kiro-cli chat     # CLI from the repo root
 ```
@@ -55,7 +59,7 @@ The estimators were implemented three times independently and agree to six decim
 ```bash
 python3 -m pip install lifelines
 python3 scripts/refresh_numbers.py                 # re-pull every figure, self-check, lint the docs' claims
-npm install && npm test                            # 18 tests, incl. 12 fast-check properties
+npm ci && npm test                                 # includes 12 fast-check properties
 ./scripts/fetch_cohort_cases.sh                    # rebuild fixtures from live data, no key
 python3 scripts/validate_against_lifelines.py      # third opinion vs the standard library
 ```
@@ -81,7 +85,7 @@ the map's basemap, boundaries and fonts are committed as static files in `public
 ```bash
 git clone https://github.com/seannkim2-jpg/kiro-hackachusetts.git
 cd kiro-hackachusetts
-npm install
+npm ci
 npm run build && npm run preview   # production build at http://localhost:4173
 # or: npm run dev                  # development server
 ```
