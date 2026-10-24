@@ -21,5 +21,6 @@ Use the text in this folder for the Hackachusetts submission form. The project i
 2. Upload the video publicly to YouTube, Vimeo, Facebook Video, or Youku. Open its URL in a signed-out browser before putting it in the form.
 3. Paste the repository URL, video URL, track, description, Kiro write-up, and testing instructions into the hackathon form. Add Sean Kim as the sole team member. Submit the form before the deadline shown on the hackathon site.
 4. Confirm the public repository still contains [`.kiro/`](../.kiro/) at its root and that the final code on `main` is the version you want judged.
+5. Confirm the entry is your original work and that you have permission for every third-party asset shown or shipped. Keep the map attribution and bundled skill licences. All submission copy in this folder is in English.
 
 The repository has the source, static map assets, lockfile, and clean-clone commands. No account or API key is needed to use the app. The data changes as the cities update their feeds, so the figures in the video can differ from the documented October 24 snapshot.
