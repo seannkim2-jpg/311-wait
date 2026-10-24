@@ -20,7 +20,7 @@ import {
   wilson,
   benjaminiHochberg,
 } from './stats'
-import type { KMObservation, AJObservation } from './stats'
+import type { KMObservation } from './stats'
 
 // ---------------------------------------------------------------------------
 // Arbitraries
@@ -168,8 +168,6 @@ describe('kaplanMeier with no censoring equals 1 − ECDF', () => {
           const sortedTimes = [...new Set(obs.map(o => o.hours))].sort((a, b) => a - b)
 
           let cumEvents = 0
-          let stepIdx = 0
-
           for (const t of sortedTimes) {
             const eventsAtT = obs.filter(o => o.hours === t).length
             cumEvents += eventsAtT
@@ -180,7 +178,6 @@ describe('kaplanMeier with no censoring equals 1 − ECDF', () => {
 
             const ecdf = cumEvents / n
             expect(kmStep.s).toBeCloseTo(1 - ecdf, 9)
-            stepIdx++
           }
         },
       ),
