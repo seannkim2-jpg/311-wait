@@ -313,8 +313,6 @@ export function wilson(successes: number, n: number, z = 1.96): WilsonInterval {
   if (successes < 0 || successes > n) throw new Error('wilson: successes must be in [0, n]');
 
   const z2 = z * z;
-  const p = successes / n;
-
   const center = (successes + z2 / 2) / (n + z2);
   const margin = (z / (n + z2)) * Math.sqrt(successes * (n - successes) / n + z2 / 4);
 
