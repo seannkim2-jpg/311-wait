@@ -9,7 +9,7 @@ Deadline 20:00 ET. One commit per step. Cut order at the bottom.
 - [x] **T-5** Hooks in `.kiro/hooks/`: claim lint, `npm test` on `src/lib/**`, accessibility review
 - [x] **T-6** `survivalAt` + `conditionalClose` in `stats.ts`; fast-check properties; golden
       cross-check against the script (MC-05)
-- [ ] **T-7** `parseCaseId` + `fetchCase` in `boston311.ts`; property test (MC-02, MC-03)
+- [x] **T-7** `parseCaseId` + `fetchCase` in `boston311.ts`; property test (MC-02, MC-03)
 - [ ] **T-8** `cambridge311.ts` + test (MC-08 data)
 - [ ] **T-9** `CaseLookup` section: facts, chance, summary, copy (MC-04, MC-06, MC-07)
 - [ ] **T-10** `Cambridge` section (MC-08)

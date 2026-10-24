@@ -156,7 +156,7 @@ export async function fetchExtractCutoff(): Promise<number> {
   return Math.max(parseTimestamp(r.mo), parseTimestamp(r.mc))
 }
 
-function parseTimestamp(ts: string): number {
+export function parseTimestamp(ts: string): number {
   // CKAN returns "2026-07-14 10:56:30.994145+00"; make it ISO-8601 so Date can read it.
   const iso = ts.trim().replace(' ', 'T').replace(/\+00(:00)?$/, 'Z')
   const ms = Date.parse(iso.endsWith('Z') ? iso : `${iso}Z`)
@@ -187,4 +187,47 @@ export function toObservations(rows: CaseRow[], censorAt: number): Observation[]
     }
   }
   return out
+}
+
+// ---------------------------------------------------------------------------
+// Single-case lookup (make-the-case, MC-02 / MC-03)
+// ---------------------------------------------------------------------------
+
+/** Every case ID in the resource has this shape (checked by scripts/check_make_the_case.py). */
+export const CASE_ID_PATTERN = /^BCS-\d{8}$/
+
+/**
+ * Normalise what a resident typed (trim, upper-case) and accept it only if it is exactly a case
+ * ID. Anything else returns null and must never reach a query.
+ */
+export function parseCaseId(input: string): string | null {
+  const id = input.trim().toUpperCase()
+  return CASE_ID_PATTERN.test(id) ? id : null
+}
+
+export interface CaseRecord {
+  case_id: string
+  service_name: string
+  case_status: string
+  closure_reason: string | null
+  open_date: string
+  close_date: string | null
+  target_close_date: string | null
+  city_council_district: string | null
+}
+
+/**
+ * One case by exact ID. Asks for no address, street, coordinate, photo or comment fields: the
+ * page shows only what the resident needs about their own request.
+ */
+export async function fetchCase(caseId: string): Promise<CaseRecord | null> {
+  // Re-checked here so no caller can skip validation; the value is then also quoted.
+  if (!CASE_ID_PATTERN.test(caseId)) throw new Error('Not a case ID')
+  const rows = await runSql<CaseRecord>(`
+    SELECT case_id, service_name, case_status, closure_reason, open_date, close_date,
+           target_close_date, city_council_district
+    FROM "${RESOURCE}"
+    WHERE case_id = ${quote(caseId)}
+    LIMIT 2`)
+  return rows[0] ?? null
 }
