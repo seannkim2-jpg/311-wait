@@ -1,0 +1,14 @@
+# NEVER add .kiro/ here — the Hackachusetts rules disqualify submissions
+# whose repo is missing the /.kiro directory.
+
+.context/
+.DS_Store
+node_modules/
+dist/
+build/
+.env
+.env.local
+__pycache__/
+*.pyc
+.venv/
+venv/
