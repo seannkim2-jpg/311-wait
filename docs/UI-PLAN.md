@@ -1,5 +1,8 @@
 # Wait Audit — website & architecture plan
 
+> **Companion document.** This is the *architecture* plan. [`UI-DESIGN.md`](./UI-DESIGN.md) is
+> the *design* brief and governs tone, copy and accessibility.
+
 Status: **planning only. Do not build or deploy from this yet.** This document collects the
 agreed UI structure plus an expanded "God's-eye map" direction and the open-source building
 blocks researched for it. We iterate on this before writing view code.
@@ -189,11 +192,19 @@ Everything else, the map included, is enhancement.
 
 ---
 
-## 7. Open questions to resolve before building
+## 7. Decisions (resolved 2026-10-24, ~13:50)
 
-- Map first build: **choropleth only**, or go straight for choropleth + points?
-- Leaflet (raster, safe) vs MapLibre GL (vector, nicer zoom, heavier) for the map renderer?
-- Does the neighborhood zoom reuse Layer 2 components as-is, or need a compact variant?
-- Keep `CityMap` as a section in the one-page scroll, or a separate route?
-- Any additional datasets to layer (wards/precincts, or a second service category) without
-  breaking the "one airtight finding" discipline the roadmap warns about?
+Settled so the build is not blocked. Roughly six hours remain before the deadline, so each
+call favours shipping one airtight thing over breadth.
+
+| Question | Decision | Why |
+| --- | --- | --- |
+| Choropleth only, or choropleth + points? | **Choropleth only.** Points are a stretch goal. | 26 polygons join on a key we verified. Plotting thousands of markers adds clustering, performance and a11y work for no extra finding. |
+| Leaflet or MapLibre GL? | **Leaflet.** | BSD-2, smaller, raster tiles need no key or style host. Vector zoom quality is not worth the bundle tonight. |
+| Does neighborhood zoom reuse Layer 2 components? | **Reuse as-is.** No compact variant. | A second variant doubles the a11y and testing surface. If a component is too tall, cut content rather than fork it. |
+| `CityMap` as a scroll section or its own route? | **Section in the one-page scroll.** | A route needs navigation, deep-link state and its own loading story. The whole argument should be readable in one scroll. |
+| Layer extra datasets (wards/precincts, second service)? | **No.** | The roadmap is explicit that more surface is not more value here. The service picker already covers breadth; wards add a geography nobody asked about. |
+
+### Still genuinely open
+- Whether the map ships at all. It is the highest-payoff addition but the **first cut** if the
+  three layers are not finished and accessible by 16:00.

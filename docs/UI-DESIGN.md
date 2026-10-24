@@ -1,5 +1,10 @@
 # UI and design brief
 
+> **Companion document.** This is the *design* brief — principles, layers, tone, copy rules,
+> accessibility. [`UI-PLAN.md`](./UI-PLAN.md) is the *architecture* plan — component tree, data
+> flow, the map direction, open-source picks and build order. Read both; they agree. Where they
+> appear to differ, this file governs design and tone, `UI-PLAN.md` governs structure.
+
 For the separate Claude session that builds the interface. `src/lib/` is finished and tested —
 treat it as a stable API and do not edit it. Everything here is the view layer.
 
