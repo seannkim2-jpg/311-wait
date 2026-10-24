@@ -17,7 +17,7 @@ Deadline 20:00 ET. One commit per step. Cut order at the bottom.
       `web-design-guidelines`); axe; 390 px check (MC-10)
 - [x] **T-12** End check: tests, build, lint, claim lint, `check_make_the_case.py` live and
       `--compare` against the rendered page (MC-01, MC-11)
-- [ ] **T-13** `docs/KIRO-USAGE.md` entries; pull request into `main`
+- [x] **T-13** `docs/KIRO-USAGE.md` entries; pull request into `main`
 
 Cut order: 1. Cambridge issue-type picker (keep "all requests"). 2. Accessibility review hook.
 Never cut: the check script, the ID validation, the "historically" wording.

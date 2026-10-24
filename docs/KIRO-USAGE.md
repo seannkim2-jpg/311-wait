@@ -103,3 +103,34 @@ hold (no new steps, same event times and counts, at-risk count up by exactly one
 
 Testing caught errors from every side, not only Kiro's: the Python reference, a requirement
 written during planning, and an unsourced claim in our own README.
+
+## Make the case (case lookup + Cambridge), 2026-10-24
+
+Built in Kiro Web (Vibe mode, Claude Opus 5.5) on branch `make-the-case`, one commit per step.
+The team dropped the five-card "What Boston could report" plan in favour of this one.
+
+| Kiro feature | What it did | Commit |
+| --- | --- | --- |
+| **Check script first** | `scripts/check_make_the_case.py` was written and run before any feature code. It uses its own standard-library Kaplan–Meier and rechecked the six "chance of closing in the next 14 days" figures in the proposal, which came from an unchecked run. All six reproduced (4, 1, 25, 8, 16 and 2 in 100, each resting on at least 137 cases). It also confirmed that 0 case IDs break `^BCS-\d{8}$` and that the live single-case lookup works. It then found that Cambridge's data now has a real close time, so Cambridge needs no last-updated proxy. | `1216103` |
+| **Plan** | `docs/plans/MAKE-THE-CASE.md` replaced `SOLUTION-HOME.md`. Every figure in it comes from the script. | `0ea224e` |
+| **Spec** | `.kiro/specs/make-the-case/`: 11 SHALL requirements (MC-01 to MC-11), the design and the tasks, committed before any code. Tasks were ticked off in the same commit as each step. | `878fa7d` |
+| **Steering** | `.kiro/steering/claims.md` (`inclusion: fileMatch` on `src/components/**` and `docs/**`) holds the advocacy wording: "historically", no promises or blame, no causal claims or rankings, Noted/Transitioned named, Cambridge labelled and never pooled. It loads only when copy is being written. | `57bfc3d` |
+| **Hook: claim lint** | `.kiro/hooks/claim-lint-on-save.json`. When a file under `src/` or `docs/` is saved, run `refresh_numbers.py --lint-only` and fix the wording, never the lint. Every commit on this branch passed with 0 problems. | `259491c` |
+| **Hook: tests on `src/lib`** | `.kiro/hooks/tests-on-lib-save.json`. When `src/lib/**` is saved, run `npm test` and fix the code, not the properties. | `259491c` |
+| **Hook: accessibility review** | `.kiro/hooks/a11y-review-on-component-save.json`. When a component is saved, review keyboard access, labels, live regions, contrast and 390 px width using the `frontend-a11y` skill. | `259491c` |
+| **Property-based testing** | `conditionalClose` stays in [0, 1], never falls as the window grows, equals `1 − S(age+window)/S(age)` read off the same curve exactly, and equals `1 − S(window)` at age 0. `parseCaseId` returns only well-formed IDs across 2,000 arbitrary strings and rejects injection payloads. Cambridge row accounting balances. The summary wording never predicts the case and makes at most one request. | `72bb776`, `8ca217e`, `5620929`, `6b18477` |
+| **Cross-implementation test** | `conditionalGolden.test.ts`: TypeScript `conditionalClose` matches the script's independent Python to 1e-9 on 84 age × window cells of the real cohort. | `72bb776` |
+| **Skills** | `web-design-guidelines` (fetched the live rules) led to the placeholder ellipsis, `translate="no"` on case IDs, hover states, scroll padding under the sticky header and explicit select colours. `frontend-a11y` led to labelled controls, `aria-describedby` errors and one short `aria-live` status line instead of re-reading the whole block. `make-interfaces-feel-better` set 44–48 px hit areas and `scale(0.96)` on press. `tufte-data-viz` kept the comparison to two directly labelled bars. | `c6f1e24` |
+| **End check** | `check_make_the_case.py --compare` fetches each case shown on the built page and recomputes its chance and similar-case count independently. Five cases, three Cambridge views and four hero figures all matched (`data/make-the-case-page.json`). In the same pass axe found 0 violations, and the page was 390 px wide at 390 px with no horizontal scroll. | `5d09675` |
+
+What testing changed on this branch:
+
+- **fast-check corrected a property, not the code.** The first injection property listed a
+  newline. fast-check showed `"\nBCS-00000000"` correctly trims to the clean ID, so the
+  property was wrong. Whitespace handling was already covered by the trimming property.
+- **The end-to-end comparison caught a wording mismatch.** The page said "still open after 33
+  days" but computed the chance at 33.8 days. The figure is now read at the whole day count the
+  sentence states, and the script does the same, so the words and the number describe the same
+  group of cases.
+- **Hooks in Kiro Web.** Kiro Web stores hooks but does not run them, so in this session each
+  hook's command was run by hand at every step. The hook files fire in the Kiro IDE and CLI V3.
