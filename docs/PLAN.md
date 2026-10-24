@@ -10,8 +10,9 @@ experience. No login,
 no backend, no API key. It queries the city's live open-data endpoint from the browser and runs
 the statistics on the page.
 
-Next extension: [`plans/SOLUTION-HOME.md`](./plans/SOLUTION-HOME.md), the "What Boston could
-report" front page.
+Next extension: [`plans/MAKE-THE-CASE.md`](./plans/MAKE-THE-CASE.md): a case lookup that
+tells a resident where their request stands and gives them a summary to send, plus Cambridge.
+It replaces the earlier five-card "What Boston could report" plan, which was dropped.
 
 Full statistical detail: [`ANALYSIS.md`](./ANALYSIS.md). Spec:
 [`.kiro/specs/service-wait-audit/`](../.kiro/specs/service-wait-audit/).
