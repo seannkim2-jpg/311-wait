@@ -12,8 +12,8 @@ Deadline 20:00 ET. One commit per step. Cut order at the bottom.
 - [x] **T-7** `parseCaseId` + `fetchCase` in `boston311.ts`; property test (MC-02, MC-03)
 - [x] **T-8** `cambridge311.ts` + test (MC-08 data)
 - [x] **T-9** `CaseLookup` section: facts, chance, summary, copy (MC-04, MC-06, MC-07)
-- [ ] **T-10** `Cambridge` section (MC-08)
-- [ ] **T-11** Skills review (`frontend-a11y`, `tufte-data-viz`, `make-interfaces-feel-better`,
+- [x] **T-10** `Cambridge` section (MC-08)
+- [x] **T-11** Skills review (`frontend-a11y`, `tufte-data-viz`, `make-interfaces-feel-better`,
       `web-design-guidelines`); axe; 390 px check (MC-10)
 - [ ] **T-12** End check: tests, build, lint, claim lint, `check_make_the_case.py` live and
       `--compare` against the rendered page (MC-01, MC-11)

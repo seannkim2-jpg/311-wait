@@ -10,6 +10,7 @@ import { OutcomeChart } from './components/charts/OutcomeChart'
 import { NeighborhoodTable } from './components/NeighborhoodTable'
 import { Footer, Method } from './components/Method'
 import { CaseLookup } from './components/CaseLookup'
+import { Cambridge } from './components/Cambridge'
 
 // MapLibre is the heaviest dependency; load it after the answer has painted.
 const CityMap = lazy(() => import('./components/map/CityMap'))
@@ -170,6 +171,15 @@ export default function App() {
             </Section>
           </>
         )}
+
+        <Section
+          id="cambridge"
+          tone="mist"
+          title="Cambridge, same check"
+          lede="Cambridge publishes its 311 requests too. The same comparison on Cambridge's own data: the median among closed tickets next to the estimate including the tickets still open."
+        >
+          <Cambridge />
+        </Section>
 
         <Section id="method" title="How we counted">
           <Method overview={overview} audit={audit} />
