@@ -75,13 +75,13 @@ Three rules keep it simple:
 ```
 WAIT AUDIT · Boston 311                    data.boston.gov · queried 2026-10-24 13:40 ET
 ──────────────────────────────────────────────────────────────────────────────
-Nearly 1 in 4 Boston 311 cases marked "closed" were not resolved.
+Nearly 1 in 4 closed Boston 311 cases ended as Noted or Transitioned rather than Resolved.
 23.9% of 48,903 closed cases were filed as Noted or Transitioned.
 
 ( Street lights ● )( Potholes )( Sidewalks )( Litter )( More services ▾ )
 
 Street light outages
-┃ 14.7 days                                 City's method
+┃ 14.5 days                                 Closed cases only
 ┃ until half are closed,                    4.7 days
 ┃ counting the ones still open.             closed cases only
 ┃
@@ -102,7 +102,7 @@ n = 1,413 · 37.9% still open · cases opened 1 Jul–24 Oct 2026 · max ≈115 
 
 ### Screen 2: where people are waiting (map, full width, ~80vh)
 
-- A floating card says **"6,240 cases are past the city's own deadline"**, with
+- A floating card says **"6,624 cases are past the city's own deadline"** (count from `target_close_date`, not `on_time`), with
   *"A snapshot of open cases today, not a rate."* underneath.
 - The map follows the picker by default, with a `This service | All services` toggle.
 - City view: a choropleth with a single-hue red ramp. Hover or focus lifts the outline and shows the count.
@@ -112,9 +112,9 @@ n = 1,413 · 37.9% still open · cases opened 1 Jul–24 Oct 2026 · max ≈115 
 ### Screen 3: why the city's number is too low (evidence, in spec order)
 
 1. **What happens to a report.** Cumulative incidence (Aalen–Johansen) as stacked step-areas over
-   0–115 days: resolved, closed but not resolved, still open. A 100% bar at the right edge carries
+   0–115 days: resolved, Noted or Transitioned, still open. A 100% bar at the right edge carries
    the direct labels (*70% · 7% · 23%*), so it reads in one glance and still meets REQ-21.
-   Annotation: *"23.9% of closed cases were Noted or Transitioned — not resolved."*
+   Annotation: *"23.9% of closed cases were closed as Noted or Transitioned rather than Resolved."*
 2. **Bias callout** (the exact REQ-06 sentence), full width on a pale-cobalt panel, with
    **3.1×** set large on the left.
 3. **Still waiting, day by day.** The Kaplan–Meier step line (cobalt) with its band, against the
@@ -142,8 +142,8 @@ Contrast is measured against the paper colour.
 | Paper | `#FAFAF7` | Page background (cards `#FFFFFF`, rules `#E6E6E1`) | — |
 | Ink | `#14161A` | Text | 17.3:1 |
 | Data | `#2440E8` | What the data shows: hero number, KM line, resolved | 6.75:1 |
-| City | `#5E6676` | The city's method: comparison figure, closed-only line | 5.52:1 |
-| Not resolved | `#A35F00` | Noted/Transitioned segment (hatched), caveats | 4.79:1 |
+| City | `#5E6676` | Closed-cases-only comparison figure and line | 5.52:1 |
+| Noted/Transitioned | `#A35F00` | Noted/Transitioned segment (hatched), caveats | 4.79:1 |
 | Overdue | `#C8242D` | Still open or past deadline, map ramp end (dotted) | 5.36:1 |
 
 Cobalt and red are only 1.26:1 against each other, so adjacent segments get 2 px paper gaps,
@@ -185,7 +185,7 @@ Motion rules:
 - No animation library. Use CSS, one small `requestAnimationFrame` count-up hook, Recharts'
   built-in animation and MapLibre's `flyTo`.
 - The count-up digits are `aria-hidden`. A visually hidden `aria-live` region announces only the
-  final sentence, e.g. *"Now showing street light outages: 14.7 days, city's method 4.7 days."*
+  final sentence, e.g. *"Now showing street light outages: 14.5 days; closed cases alone say 4.7 days."*
 
 ---
 

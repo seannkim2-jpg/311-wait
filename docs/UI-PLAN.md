@@ -36,19 +36,19 @@ The official site pairs the Boston 311 dataset with these two challenges (paraph
   is waiting.*
 
 Wait Audit maps onto this directly. The survival analysis provides the **service
-transparency** (the city's own figure leaves out the people still waiting). The God's-eye map
+transparency** (a median over closed cases leaves out the people still waiting). The God's-eye map
 shows the **geographic pattern** (where those open cases are right now).
 
 ---
 
 ## 1. What the service does
 
-Boston publishes an on-time rate and a median closure time for 311 requests, but both are
-computed **only over closed cases**. That leaves out the thousands of requests still open,
-which tend to be the slow ones. **Wait Audit puts them back in.** It applies **Kaplan–Meier**
+A median closure time taken over closed cases only leaves out the thousands of 311 requests
+still open, which tend to be the slow ones. (This is not a claim about how the city computes
+anything; see `docs/research/claim-check.md`.) **Wait Audit puts them back in.** It applies **Kaplan–Meier**
 to time-to-closure, counting still-open cases as censored, and **Aalen–Johansen**
-competing-risks incidence to separate requests that were genuinely *resolved* from those
-merely *closed* (`Noted` / `Transitioned`). It then maps where the open and overdue cases are
+competing-risks incidence to separate requests closed as *resolved* from those closed as
+`Noted` (no action required) or `Transitioned` (reassigned to another agency). It then maps where the open and overdue cases are
 today. It makes **no causal claim**: it audits the measurement and shows `n`, censoring counts,
 and confidence intervals. The estimators are implemented three times independently (Kiro
 TypeScript, a Python reference, `lifelines`) and agree to six decimal places.
