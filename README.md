@@ -138,15 +138,9 @@ and clean-checkout test fixes ([PR #5](https://github.com/seannkim2-jpg/311-wait
 `/.kiro` at the repo root is required evidence for judging and must never be added to
 `.gitignore`.
 
-## Submission checklist
+## Hackachusetts submission
 
-- [ ] Repo is **public**
-- [ ] `/.kiro` committed at the root, with real specs, steering, and hooks in it
-- [ ] Challenge track identified above
-- [ ] Text description of features and functionality
-- [ ] Demo video under 3 minutes, public on YouTube/Vimeo/Facebook/Youku, no third-party
-      trademarks or copyrighted music
-- [ ] Live demo, test build, or hosted URL a judge can reach free of charge
-- [ ] Testing instructions, including credentials if anything is gated
-- [ ] `docs/KIRO-USAGE.md` write-up complete
-- [ ] All team members added on the hackathon site (max 4)
+The [submission packet](submission/README.md) contains the copy-ready project description,
+Kiro write-up, judge testing instructions, and a timed demo video shot list. This is a
+**Civic Action** entry by **Sean Kim (solo entrant)**. The public video URL still needs to
+be added to the hackathon form after recording and upload.
