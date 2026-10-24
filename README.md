@@ -2,7 +2,7 @@
 
 > **Track:** Civic Action
 >
-> **Live demo:** [wait-audit-livid.vercel.app](https://wait-audit-livid.vercel.app/)
+> **Live demo:** [311-wait.vercel.app](https://311-wait.vercel.app/)
 
 ## What it does
 
