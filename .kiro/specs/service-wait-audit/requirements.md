@@ -103,6 +103,11 @@ One line of visible text directly above the table SHALL read:
 The closure-reason panel is the PRIMARY framing of the app. It SHALL appear before the
 KM chart in visual order.
 
+> **Amended 2026-10-24 (team decision, see `docs/UI-VISUAL-PLAN.md` §7):** the KM
+> "day by day" chart renders first, then the REQ-06 bias callout, then this panel. The
+> 23.9% closure finding still opens the page as the hero headline, so it remains the
+> first headline a user sees. The order may be revisited.
+
 For the cohort (n = 56,797) and for the selected service type, the app SHALL display
 the count and percentage of closed cases by `closure_reason` value. Key cohort figures:
 

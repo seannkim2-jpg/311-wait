@@ -18,4 +18,12 @@ describe('toObservations', () => {
       { hours: 24, cause: 1 },
     ])
   })
+
+  it('reads timestamptz output ("+00:00"), the form fetchExtractCutoff gets back', () => {
+    const obs = toObservations(
+      [{ case_status: 'In progress', closure_reason: null, open_date: '2026-10-23T09:00:00.000000+00:00', close_date: null }],
+      Date.parse('2026-10-24T09:00:00Z'),
+    )
+    expect(obs).toEqual([{ hours: 24, cause: 0 }])
+  })
 })

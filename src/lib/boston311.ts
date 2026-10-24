@@ -158,7 +158,7 @@ export async function fetchExtractCutoff(): Promise<number> {
 
 function parseTimestamp(ts: string): number {
   // CKAN returns "2026-07-14 10:56:30.994145+00"; make it ISO-8601 so Date can read it.
-  const iso = ts.trim().replace(' ', 'T').replace(/\+00$/, 'Z')
+  const iso = ts.trim().replace(' ', 'T').replace(/\+00(:00)?$/, 'Z')
   const ms = Date.parse(iso.endsWith('Z') ? iso : `${iso}Z`)
   if (Number.isNaN(ms)) throw new Error(`Unparseable timestamp: ${ts}`)
   return ms
