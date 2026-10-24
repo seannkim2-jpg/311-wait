@@ -41,6 +41,20 @@ def load(path):
     return obs
 
 
+def median(values):
+    """Proper median: average the two middle values when the count is even.
+
+    An earlier version returned the upper middle value, which disagreed with the
+    TypeScript for even-sized samples. The cross-implementation test caught it.
+    """
+    xs = sorted(values)
+    n = len(xs)
+    if n == 0:
+        raise ValueError("median of empty sequence")
+    mid = n // 2
+    return xs[mid] if n % 2 else (xs[mid - 1] + xs[mid]) / 2
+
+
 def kaplan_meier(obs):
     """obs: (hours, event_bool). Returns (median_or_None, final_S)."""
     event_times = sorted({t for t, e in obs if e})
@@ -90,7 +104,7 @@ def main():
         name = os.path.basename(path)[3:-5]
         events = [h for h, c in obs if c in (1, 2)]
         censored = [h for h, c in obs if c == 0]
-        naive = sorted(events)[len(events) // 2]
+        naive = median(events)
         km_median, km_final = kaplan_meier([(h, c in (1, 2)) for h, c in obs])
         cif, still = aalen_johansen(obs)
         out["services"][name] = {

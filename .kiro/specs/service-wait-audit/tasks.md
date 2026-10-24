@@ -1,71 +1,134 @@
 # Tasks: service-wait-audit
 
-Build order for a 13:00–20:00 ET deadline. Seven hours total.  
+Build order for a 13:00–20:00 ET deadline. Seven hours total.
 Tasks are listed in the order they must be built. Mark each complete before starting the next.
+
+Cohort: `open_date >= '2026-07-01'`, n = 56,797. All headline numbers use this cohort.
+AJ (Aalen-Johansen CIF) is a first-class requirement, not optional.
 
 ---
 
-## Phase 0 — Scaffolding check (13:00–13:30)
+## Phase 0 — Scaffolding check (13:00–13:30) ✓
 
-- [ ] **T-00** Confirm React + Vite + Tailwind + Recharts are installed and `npm run dev` starts without error
-- [ ] **T-01** Create `.kiro/specs/service-wait-audit/requirements.md` ✓ (this file's siblings)
-- [ ] **T-02** Create `.kiro/specs/service-wait-audit/design.md` ✓
-- [ ] **T-03** Create `.kiro/specs/service-wait-audit/tasks.md` ✓ (this file)
-- [ ] **T-04** Add Vitest and fast-check to dev dependencies: `npm install -D vitest @vitest/ui fast-check tsx`
-- [ ] **T-05** Add `scripts/` directory; add `"prebuild": "tsx scripts/fetch-data.ts"` and `"test": "vitest run"` to `package.json`
-- [ ] **T-06** Create `.kiro/hooks/stats-pbt.json` (run PBT on save of `src/stats/**/*.ts`)
-- [ ] **T-07** Create `.kiro/hooks/endpoint-shape.json` (verify CKAN endpoint on save of `scripts/fetch-data.ts`)
+- [x] **T-00** Confirm React + Vite + Tailwind + Recharts are installed and `npm run dev` starts without error
+- [x] **T-01** Create `.kiro/specs/service-wait-audit/requirements.md` ✓
+- [x] **T-02** Create `.kiro/specs/service-wait-audit/design.md` ✓
+- [x] **T-03** Create `.kiro/specs/service-wait-audit/tasks.md` ✓
+- [x] **T-04** Add Vitest and fast-check to dev dependencies: `npm install -D vitest fast-check`
+- [x] **T-05** Add `"test": "vitest run"` and `"test:watch": "vitest"` to `package.json`
+- [ ] **T-06** Create `.kiro/hooks/stats-pbt.json` (run PBT on save of `src/lib/stats.ts`)
 
 ---
 
 ## Phase 1 — Stats module + PBT (13:30–14:30)
 
-### T-10 Postgres interval parser (`src/stats/interval.ts`)
+All statistics live in a single file: `src/lib/stats.ts`. Pure TypeScript, no runtime
+dependencies, no React, no fetch.
 
-Implement `parseInterval(s: string): number` and `formatInterval(n: number): string`.
+### T-10 `parsePgInterval(s: string): number` → hours
 
-Acceptance: handles all four forms from REQ-02. Fractional seconds preserved within floating-point tolerance.
+Parses Postgres interval strings:
+- `"13 days, 12:33:42.319741"` — plural days + fractional seconds
+- `"1 day, 00:00:01"` — singular day
+- `"9:32:19.776794"` — bare HMS + fractional seconds
+- `"HH:MM:SS"` — bare HMS
 
-### T-11 PBT for interval parser
+Returns total hours. Throws on unrecognized format.
 
-Write `src/stats/__tests__/interval.pbt.test.ts`. One `it.prop` test: round-trip property. Must pass with 1,000 generated samples.
+### T-11 `naiveMedian(hours: number[]): number`
 
-### T-12 Kaplan–Meier estimator (`src/stats/km.ts`)
+Median of the array. Handles even-length arrays with average of two middle values.
 
-Implement `kaplanMeier(obs: Observation[]): KMStep[]` and `kmMedian(steps: KMStep[]): number | null`.
+### T-12 Kaplan–Meier: `kaplanMeier(obs: {hours: number, event: boolean}[])`
 
-Include Greenwood variance and log–log CI per design doc.
+Returns `{ curve: {t, s, atRisk, events, se}[], median: number | null }`.
 
-Acceptance:
-- Empty input returns `[]`
-- All-event (no censoring) result equals `1 − ECDF`
-- `S(t)` monotonically non-increasing
+Standard product-limit estimator. Greenwood SE: `S(t) × sqrt(Σ d/(n(n-d)))`.
+Median = first t where S(t) ≤ 0.5, or null (Sidewalk Repair case).
 
-### T-13 PBT for KM
+### T-13 Aalen-Johansen: `aalenJohansen(obs: {hours: number, cause: 0|1|2}[])`
 
-Write `src/stats/__tests__/km.pbt.test.ts`. Five `it.prop` tests:
-1. Monotonicity
-2. Range [0, 1]
-3. Equals 1−ECDF when no censoring
-4. Late censored observation leaves curve unchanged
-5. Greenwood CI contains S(t) at every step
+**This is first-class, not optional.** Cause codes: 0=censored, 1=resolved, 2=Noted/Transitioned.
 
-### T-14 Wilson score interval (`src/stats/wilson.ts`)
+Returns:
+```ts
+{
+  curve1: {t: number, cif: number}[];   // genuine resolution CIF
+  curve2: {t: number, cif: number}[];   // admin closure CIF
+  final1: number;          // F₁(∞)
+  final2: number;          // F₂(∞)
+  stillUnresolved: number; // 1 - final1 - final2
+}
+```
 
-Implement `wilson(k: number, n: number, z?: number): { lower: number; upper: number }`.
+Algorithm:
+1. Combined event hazard → shared survival S(t)
+2. Per-cause increment: ΔFₖ(tᵢ) = S(tᵢ₋) × dᵢₖ / nᵢ
+3. Fₖ(t) = cumulative sum of ΔFₖ
 
-### T-15 PBT for Wilson
+Invariant: F₁(∞) + F₂(∞) + stillUnresolved = 1.0 within 1e-9.
 
-Write `src/stats/__tests__/wilson.pbt.test.ts`. Three `it.prop` tests:
-1. CI contains p
-2. Both bounds in [0, 1]
-3. Positive width for all p ∈ [0, 1], n ≥ 1
+### T-14 `wilson(successes: number, n: number, z?: number)`
 
-### T-16 Naive median (`src/stats/naive.ts`)
+Wilson score interval. Default z=1.96. Returns `{lower, upper}` in [0,1].
+Handles p=0 and p=1 without collapsing.
 
-Implement `naiveMedian(durations: number[]): number` and `naivePercentile(durations: number[], p: number): number`.
+### T-15 `logRank(a, b): {statistic: number, pValue: number}`
 
-### T-17 Run all PBT — must be green before proceeding
+Log-rank test on 1 df. Chi-squared p-value. [DROP IF BEHIND]
+
+### T-16 `benjaminiHochberg(p: number[]): number[]`
+
+BH adjustment. Output is monotone and never below input. [DROP IF BEHIND]
+
+### T-17 Create `src/lib/__fixtures__/golden.json`
+
+Golden values from independent Python implementation on real cohort (±0.005 tolerance):
+```json
+{
+  "streetLightOutage": {
+    "n": 1413, "censored": 536,
+    "naiveMedianDays": 4.75, "kmMedianDays": 14.67, "ratio": 3.09,
+    "aj": { "resolved": 0.704, "adminClosed": 0.070, "unresolved": 0.226 }
+  },
+  "sidewalkRepair": {
+    "n": 2561, "censored": 1798,
+    "naiveMedianDays": 0.86, "kmMedianDays": null, "sFinal": 0.683,
+    "aj": { "resolved": 0.177, "adminClosed": 0.140, "unresolved": 0.683 }
+  },
+  "pothole": {
+    "n": 2214, "censored": 485,
+    "naiveMedianDays": 1.83, "kmMedianDays": 3.09, "ratio": 1.69,
+    "aj": { "resolved": 0.644, "adminClosed": 0.160, "unresolved": 0.196 }
+  },
+  "litterDebris": {
+    "n": 9839, "censored": 403,
+    "naiveMedianDays": 0.40, "kmMedianDays": 0.45, "ratio": 1.13,
+    "aj": { "resolved": 0.801, "adminClosed": 0.164, "unresolved": 0.036 }
+  }
+}
+```
+
+### T-18 `src/lib/stats.test.ts` — property-based and golden tests
+
+PBT (fast-check 4.x: `fc.assert(fc.property(...))`):
+1. `parsePgInterval` round-trip — generate `{days, h, m, s}`, format, parse, compare
+2. KM monotonicity — S(t) non-increasing
+3. KM range — every S(t) in [0, 1]
+4. KM = 1−ECDF when no censoring
+5. Late censored observation leaves curve unchanged
+6. Wilson contains p
+7. Wilson bounds in [0, 1]
+8. Wilson positive width
+9. AJ sum to 1 within 1e-9
+10. BH output monotone and never below input
+
+Golden tests (exact-value unit tests against golden.json, tolerance ±0.5% for AJ):
+- AJ final incidences for a synthetic dataset matching cohort distributions
+- KM median for a small hand-computable case
+- Wilson interval for known values
+
+### T-19 Run all tests — must be green before proceeding
 
 `npm test`
 
@@ -75,23 +138,14 @@ Implement `naiveMedian(durations: number[]): number` and `naivePercentile(durati
 
 ### T-20 Build-time fetch script (`scripts/fetch-data.ts`)
 
-Paginate CKAN `datastore_search_sql` to retrieve all ~75,851 rows. Write:
-- `public/data/boston-311.json` — array of normalized `Case` objects
-- `public/data/summary.json` — tile values + fetch timestamp
+Paginate CKAN `datastore_search_sql` with `WHERE open_date >= '2026-07-01'`.
+Write:
+- `public/data/boston-311.json` — normalized `Case[]`
+- `public/data/summary.json` — cohort tile values + fetch timestamp
 
-Columns to request: `case_status`, `service_name`, `neighborhood`, `on_time`, `closure_reason`, `open_date`, `close_date`, `target_close_date`.
+Expected: n ≈ 56,797, closed ≈ 48,903, open ≈ 7,876.
 
-Duration computation: request `close_date::timestamp - open_date::timestamp AS duration` for closed cases. For in-progress, leave `close_date` null.
-
-Fetch timestamp: write `new Date().toISOString()` to `summary.json`.
-
-Acceptance: script runs in < 3 minutes, produces valid JSON, `Case[]` array has ≥ 70,000 entries.
-
-### T-21 Endpoint shape verifier (`scripts/verify-endpoint.ts`)
-
-Fetches one row from the endpoint and asserts the expected columns exist. Throws with a readable error if any column is missing.
-
-### T-22 Data loader (`src/data/loader.ts`)
+### T-21 Data loader (`src/data/loader.ts`)
 
 ```ts
 export function getCases(): Case[]
@@ -100,7 +154,11 @@ export function getSummary(): Summary
 export const SERVICES: string[]
 ```
 
-`SERVICES` = `['Street Light Outage', 'Sidewalk Repair', 'Pothole', 'Domestic Animal Issue', 'Pruning Request', 'Illegal Graffiti']`
+`SERVICES` in display order:
+```ts
+['Street Light Outage', 'Sidewalk Repair', 'Pothole',
+ 'Litter & Debris', 'Domestic Animal Issue', 'Pruning Request', 'Illegal Graffiti']
+```
 
 ---
 
@@ -108,33 +166,36 @@ export const SERVICES: string[]
 
 ### T-30 `StatTiles.tsx`
 
-Three tiles. Values from `getSummary()` + live KM compute for default service.
+Tiles:
+1. "Cases in cohort" — 56,797 (sub: "opened 2026-07-01 → 2026-10-24")
+2. "Closed without resolution" — 23.9% (sub: "11,701 Noted or Transitioned")
+3. "Wait understatement" — updates with service picker (SLO default: 3.09×)
 
-Tile labels exactly as specified in product definition §4:
-1. "Open & overdue right now" — `summary.openOverdue`
-2. "Closed without resolution" — `summary.closedUnresolvedPct`%
-3. "Underreported wait" — KM median − naive median for Street Light Outage, in days
-
-Loading state: grey skeleton `animate-pulse` bars.
+Loading: grey skeleton `animate-pulse` bars.
 
 ### T-31 `ServicePicker.tsx`
 
-`role="tablist"`. Chips `role="tab"`. Arrow key navigation. `aria-live` announcement on change. Disabled + visual indicator while loading.
+`role="tablist"`. Each chip `role="tab"` with `aria-selected`. Arrow key navigation.
+`aria-live` announcement. Disabled + indicator while loading.
 
-### T-32 `KMChart.tsx`
+### T-32 `ClosureReasonPanel.tsx` (PRIMARY — render BEFORE KMChart)
 
-Recharts `LineChart`. KM step data (solid blue `#2563eb`). Naive ECDF steps (dashed slate `#64748b`). CI band (`Area`, fill `#2563eb22`). Two `ReferenceLine` for medians. Legend with n and censored count always visible (REQ-12). `aria-label` on chart container.
+- Stacked horizontal `BarChart`: Resolved=green, Noted=amber, Transitioned=red, other=slate
+- AJ CIF line chart: F₁(t) genuine resolution, F₂(t) admin closure
+- Annotation: "23.9% of closed cases (Noted + Transitioned) were not resolved."
+- Cohort scope note (REQ-23) above this panel
 
-X-axis in days (seconds / 86400). Ticks: 0, 30, 60, 90, 180, 365.
+### T-33 `KMChart.tsx` (SUPPORTING — render AFTER ClosureReasonPanel)
 
-Acceptance: renders correctly for Street Light Outage default. Two curves visibly diverge. Both median lines visible.
+Two curves: KM (solid blue) + naive ECDF (dashed slate). CI band from Greenwood SE.
+Two ReferenceLine medians. Legend with n and censored count. `aria-label`.
+X-axis: days (hours / 24). Ticks: 0, 15, 30, 60, 90, 115.
+Independent-censoring caveat (REQ-22) below chart.
 
-### T-33 `App.tsx` root
+### T-34 `App.tsx` root
 
-- State: `selectedService`, `isLoading`, `fetchTimestamp`
-- Loads `boston-311.json` once on mount
-- Passes filtered cases to all child components
-- Header: "Wait Audit" / sub-line with timestamp
+State: `selectedService` (default "Street Light Outage"), `isLoading`, `fetchTimestamp`.
+Loads `boston-311.json` on mount. Header with timestamp (REQ-13).
 
 ---
 
@@ -142,25 +203,14 @@ Acceptance: renders correctly for Street Light Outage default. Two curves visibl
 
 ### T-40 `BiasCallout.tsx`
 
-Full-width `<section>` with highlighted background. Renders the sentence from REQ-06.  
-Background: `bg-blue-50 border-l-4 border-blue-600`.  
-Updates when service picker changes.
+Full-width `<section>`, `bg-blue-50 border-l-4 border-blue-600`.
+Standard: "naive [X d] vs KM [Y d] — [Z×] understatement."
+Sidewalk Repair: "no honest median — fewer than half of cases have ever closed."
 
-### T-41 `ClosureReasonPanel.tsx`
+### T-41 `NeighborhoodTable.tsx`
 
-Recharts horizontal stacked `BarChart`. Color map: Resolved=green, Noted=amber, Transitioned=red, other=slate.  
-Title: "How cases are closed — [service]".  
-Annotation: "~23% of closed cases (Noted + Transitioned) were not resolved."  
-`aria-label` on chart container.
-
-### T-42 `NeighborhoodTable.tsx`
-
-Columns: Neighborhood, n, Naive median, KM median, On-time rate [Wilson CI].  
-Default sort: KM median descending.  
-Suppressed cells (n < 30): `—` with tooltip (REQ-08).  
-`aria-sort` on active sort column header.
-
-Visible text above table: "Neighborhoods with fewer than 30 cases show —".
+Columns: Neighborhood, n, Naive median (days), KM median (days), On-time % [Wilson CI].
+Default sort: KM median descending. Suppressed cells: `—` with tooltip.
 
 ---
 
@@ -168,47 +218,37 @@ Visible text above table: "Neighborhoods with fewer than 30 cases show —".
 
 ### T-50 `HonestyFurniture.tsx`
 
-Section with `aria-label="Data quality notes"`. Four paragraphs:
+`<section aria-label="Data quality notes">`:
 1. Suppression line
-2. Confounder note (service-type templated, REQ-14)
-3. Query timestamp as `<time>` element
-4. Wilson CI note
-
-### T-51 Header timestamp
-
-Update `App.tsx` header to show "data.boston.gov · queried [timestamp]" where timestamp comes from `summary.json`.
+2. Confounder note (service-type templated)
+3. Query timestamp
+4. "6,240 cases currently past their deadline" — labeled as prevalence count, no denominator
 
 ---
 
 ## Phase 6 — Cambridge panel (17:45–18:15) [DROP FIRST IF BEHIND]
 
-### T-60 Cambridge fetch
+### T-60 Cambridge fetch + `CambridgePanel.tsx`
 
-Add Cambridge query to `scripts/fetch-data.ts`. Writes `public/data/cambridge-311.json`. Proxy: `ticket_last_updated_date_time − ticket_created_date_time`.
-
-### T-61 `CambridgePanel.tsx`
-
-Collapsed by default. Toggle button with `aria-expanded`. Amber proxy label before chart (REQ-16). KM chart with `isCambridgeProxy` flag adds "(proxy: last-updated)" to axis label.
+Proxy: `ticket_last_updated_date_time − ticket_created_date_time`.
+Amber proxy label. Collapsed by default. `aria-expanded`.
 
 ---
 
 ## Phase 7 — Accessibility pass (18:15–18:30)
 
-### T-70 Install and run axe-core check
+### T-70 axe-core check
 
 ```bash
 npx axe-cli http://localhost:5173 --tags wcag2a,wcag2aa
 ```
 
-Fix all critical violations before proceeding.
+Fix all critical violations.
 
 ### T-71 Keyboard navigation walkthrough
 
-Manually tab through the page. Verify:
-- Service picker: arrows move, Space/Enter select, `aria-live` fires
-- Neighborhood table: suppressed cell tooltips reachable by focus
-- Cambridge panel toggle: `aria-expanded` toggles correctly
-- All Recharts SVGs have `aria-label` or `<title>`
+Service picker arrows, Space/Enter, `aria-live`. Suppressed cell tooltips on focus.
+All Recharts SVGs have `aria-label`.
 
 ---
 
@@ -220,39 +260,31 @@ Manually tab through the page. Verify:
 npx vercel --prod
 ```
 
-Confirm live URL returns 200 and all three stat tiles show real numbers.
-
 ### T-81 Update README
 
-Add live URL to README. Update the submission checklist at top. Set track to "Civic Services".
+Live URL. Track: Civic Services. Submission checklist.
 
-### T-82 Write `docs/KIRO-USAGE.md`
+### T-82 `docs/KIRO-USAGE.md`
 
-Log how Kiro was used at each phase: CLI for spec generation, IDE for stats implementation, PBT via hooks, steering file for causal-language guardrail. Include specific prompts and the places Kiro caught errors or changed direction.
+Log Kiro usage at each phase. Note: spec generation, stats PBT, AJ red-team response.
 
 ---
 
 ## Phase 9 — Video (19:00–19:45)
 
-### T-90 Record demo (2:45 target)
-
-Shot list from product definition §8:
+Shot list:
 1. 0:00–0:20 City portal showing on-time rate
-2. 0:20–0:45 Wait Audit landing, tile 1
-3. 0:45–1:15 KM chart — the peak — with gap number on screen
-4. 1:15–1:35 Closure-reason panel
+2. 0:20–0:40 Closure-reason panel: 23.9% not resolved (the no-inference finding)
+3. 0:40–1:15 KM chart — gap number on screen, Street Light Outage 3.09×
+4. 1:15–1:35 Sidewalk Repair — "no honest median"
 5. 1:35–1:55 Neighborhood table
-6. 1:55–2:15 Honesty furniture
+6. 1:55–2:15 Honesty furniture + caveat
 7. 2:15–2:35 Service picker switching
-8. 2:35–2:45 Full page scroll + credits
-
-Upload to YouTube/Vimeo, set to public.
+8. 2:35–2:45 Full page + credits
 
 ---
 
 ## Phase 10 — Submit (19:45–20:00)
-
-### T-100 Final submission checklist
 
 - [ ] Repo is public
 - [ ] `/.kiro` committed at root
@@ -261,16 +293,16 @@ Upload to YouTube/Vimeo, set to public.
 - [ ] Demo video public, under 3 minutes
 - [ ] `docs/KIRO-USAGE.md` complete
 - [ ] All team members added on hackathon site
-- [ ] Submit on hackathon portal before 20:00 ET
+- [ ] Submit before 20:00 ET
 
 ---
 
-## Cut order (repeat from design doc)
+## Cut order
 
-1. T-60/T-61 Cambridge panel
-2. T-16 Log-rank + BH (if not yet started)
-3. T-42 Neighborhood table sort (show static order)
+1. T-60 Cambridge panel
+2. T-15/T-16 Log-rank + BH
+3. T-41 Neighborhood table sort
 4. Bootstrap CIs — never implement
-5. Cox — never implement
 
-**Floor:** T-30 (tiles), T-32 (KM chart), T-40 (bias callout), T-41 (closure-reason panel) for Street Light Outage default. These cannot be cut.
+**Floor (cannot cut):** T-30 (tiles), T-32 (ClosureReasonPanel with AJ),
+T-33 (KMChart), T-40 (BiasCallout) for Street Light Outage default.

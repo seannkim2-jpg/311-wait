@@ -12,3 +12,6 @@ __pycache__/
 *.pyc
 .venv/
 venv/
+
+# Large generated test fixture; regenerate with scripts/reference_impl.py
+src/lib/__fixtures__/cohortCases.json
