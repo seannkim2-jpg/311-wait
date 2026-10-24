@@ -136,6 +136,112 @@ censoring is present rather than inflating everything.
 "Closed as resolved" is every closure reason other than Noted or Transitioned: `Resolved`,
 `Resolved successfully`, and 958 closed cases with a blank reason.
 
+## Closure forecast
+
+**Question.** A request has been open *N* whole days. What is the historical chance it closes
+in the next 7? Both methods give `P = 1 − S(N+7) / S(N)`, where closure means any closure,
+including Noted or Transitioned. The "Already waiting?" block under the main answer shows the
+service-wide figure from the live Kaplan–Meier curve. A neighborhood-aware model was allowed
+next to it only if it beat that figure on later requests.
+
+**Model.** A Cox proportional-hazards model (lifelines `CoxPHFitter`) with service as a
+**stratum** and one-hot neighborhood covariates (23 levels in training, 24 in the final fit,
+plus "Other or unknown"), with a ridge penalty of 0.001. Service is a stratum rather than a
+covariate because each service gets its own baseline curve (litter closes in hours, street
+lights in weeks), so the comparison with per-service Kaplan–Meier measures only what
+neighborhood adds. The only predictors are fields known at filing; closure reason and `on_time`
+are not used. A KNN regressor averaging closed cases was ruled out because it would rebuild the
+closed-cases-only bias this project measures. Code: `scripts/train_closure_forecast.py`.
+
+**Test.** Fit on cases opened 1 July–31 August, censored at 1 September 00:00 UTC (27,851
+cases in the 28 site services that existed then). Scored on cases opened 1–17 September,
+followed to the 24 October extract cutoff, at *N* = 0, 14 and 30 days. At each *N* a case
+counts only if it was still open at *N* and its follow-up could reach *N* + 7 days. That rule
+uses open time only, never the outcome, so no inverse-probability weighting was needed.
+11,419 case-day checks in all. The gate was fixed in the script before any result was seen.
+
+| Days already waited | Checks | Closed within 7 d | Brier, KM | Brier, Cox | Change (95% bootstrap) | Neighborhood alone |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| 0 | 9,311 | 8,069 | 0.0738 | 0.0736 | −0.3% (−0.6 to +0.1) | −0.2% |
+| 14 | 1,131 | 54 | 0.0496 | 0.0459 | −7.5% (−15.1 to −1.8) | +0.1% |
+| 30 | 977 | 28 | 0.0316 | 0.0275 | −12.9% (−26.2 to −2.7) | +0.2% |
+| **Pooled** | 11,419 | 8,151 | 0.0678 | 0.0669 | **−1.3%** | −0.2% |
+
+"Neighborhood alone" compares the Cox model with its own service-only baseline (Nelson–Aalen,
+no neighborhood). It shows that the gains at 14 and 30 days are **not** from neighborhood. They
+come from estimating the curve as exp(−cumulative hazard) instead of as a product-limit, which
+matters where few cases remain at risk; the service-only Nelson–Aalen gets the same gain. The
+neighborhood terms change the Brier score by 0.2% at most.
+
+Calibration by predicted-probability band, all checks pooled:
+
+| Band | n, KM | KM predicted | Observed | n, Cox | Cox predicted | Observed |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| 0–10% | 1,692 | 2.4% | 2.7% | 1,700 | 2.3% | 2.6% |
+| 10–20% | 336 | 13.3% | 7.7% | 336 | 13.2% | 7.7% |
+| 20–30% | 456 | 26.1% | 27.0% | 436 | 25.8% | 25.9% |
+| 30–40% | 210 | 39.0% | 32.9% | 235 | 36.9% | 37.5% |
+| 40–50% | 450 | 42.8% | 46.9% | 526 | 43.7% | 45.4% |
+| 50–60% | 311 | 52.3% | 47.3% | 267 | 54.0% | 49.4% |
+| 60–70% | 316 | 63.8% | 71.2% | 268 | 64.6% | 73.9% |
+| 70–80% | 198 | 77.0% | 73.7% | 239 | 76.0% | 74.5% |
+| 80–90% | 213 | 80.3% | 81.7% | 354 | 84.5% | 82.8% |
+| 90–100% | 7,237 | 98.0% | 96.5% | 7,058 | 98.3% | 96.9% |
+
+Expected calibration error is 0.019 for Kaplan–Meier and 0.016 for Cox. Major services (the
+four headline services plus any with at least 1,000 training cases), pooled over *N*:
+
+| Service | Checks | Brier, KM | Brier, Cox | Change |
+| --- | ---: | ---: | ---: | ---: |
+| Dead Animal General | 502 | 0.0198 | 0.0198 | +0.1% |
+| Illegal Dumping or Disposal | 706 | 0.0169 | 0.0169 | +0.0% |
+| Improper Trash Storage | 894 | 0.0166 | 0.0167 | +0.3% |
+| Litter & Debris | 2,165 | 0.0336 | 0.0335 | −0.2% |
+| Missed Waste Pick-up | 694 | 0.0215 | 0.0215 | −0.1% |
+| Overflowing Trash | 358 | 0.0326 | 0.0330 | +1.1% |
+| Pothole | 467 | 0.1540 | 0.1538 | −0.1% |
+| Sidewalk Repair | 937 | 0.0881 | 0.0875 | −0.6% |
+| Street Light Outage | 368 | 0.1658 | 0.1646 | −0.7% |
+| Trash Placed Out Early | 712 | 0.0125 | 0.0126 | +0.1% |
+
+**Release gate: not passed.**
+
+| Criterion | Required | Result | |
+| --- | --- | --- | --- |
+| Pooled Brier score vs Kaplan–Meier | at least 5% lower | 1.3% lower | fail |
+| Calibration error | ≤ 0.05 and ≤ KM + 0.01 | 0.016 (KM 0.019) | pass |
+| Worst major service | ≤ 2% higher | Overflowing Trash, +1.1% | pass |
+
+So the page keeps the service-wide Kaplan–Meier figure, and the neighborhood control stays
+hidden. The artifact records this (`release.passed: false`), and the page reads that flag rather
+than a hard-coded switch. A rerun that passes would turn the control on with no code change.
+`?forecast=preview` shows the control, labelled as a preview, for review only. The 14- and
+30-day results point at a separate, untested change: estimating the service-wide curve with
+Nelson–Aalen. That needs its own pre-registered test before it replaces anything.
+
+**Assumptions, checked before reading any coefficient.** A rank-time Schoenfeld test flags
+none of the 24 neighborhood terms (largest statistic 1.8). But refitting on the first 7 days
+and then on days after 7 (left-truncated at day 7; 3,774 cases, 932 closures) gives neighborhood
+effects that barely agree: correlation 0.10, the same sign for 17 of 23, and shifts of up to
+0.50 in log hazard ratio. The effects are small (hazard ratios 0.81–1.20 against the average
+neighborhood) and not stable over time, so **no neighborhood coefficient is interpreted here**.
+As elsewhere in this project, nothing here supports a causal or income claim.
+
+**Static artifact.** After validation the script refits on the full cohort (54,721 cases in 33
+services, censored at the extract cutoff) and writes
+[`public/model/boston-closure-forecast.json`](../public/model/boston-closure-forecast.json)
+(87 KB). It holds only coefficients, feature names and means, each service's baseline survival
+on a daily grid, per-day at-risk counts, neighborhood case counts, the training date and the
+gate result. It has no case-level records. Before writing it, the script checks that the
+exported numbers reproduce lifelines' own predictions (to 5e-12). The page falls back to the
+service-wide figure if the gate failed, the model is more than 30 days old, the neighborhood is
+missing, the service has fewer than 30 training cases there or fewer than 30 still open at day
+*N*, or *N* + 7 is past the curve. Every metric is in
+[`../data/forecast_evaluation.json`](../data/forecast_evaluation.json).
+
+Boston only. A Cambridge view, if one is added, would keep its own method: its data has
+different fields and closure timing.
+
 ## Limitations
 
 - **Independent censoring.** Kaplan–Meier assumes cases still open are independent of eventual
@@ -161,3 +267,9 @@ claim we cannot source. Run it before recording.
 `src/lib/__fixtures__/golden.json` from the real cohort, and `src/lib/stats.test.ts` asserts
 that the TypeScript reproduces those values. Two implementations written separately agreeing is
 a stronger check than either one's own unit tests.
+
+`scripts/train_closure_forecast.py` also writes `src/lib/__fixtures__/forecastExamples.json`:
+80 Cox predictions from the fitted lifelines model and 20 Kaplan–Meier conditional estimates
+from lifelines on the committed case fixture. `src/lib/closureForecast.test.ts` asserts that
+the TypeScript reader, using only the exported artifact, matches them to 1e-6 (Cox) and 1e-9
+(Kaplan–Meier). It also tests every fallback rule, plus three fast-check properties.

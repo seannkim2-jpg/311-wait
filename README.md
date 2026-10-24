@@ -31,6 +31,11 @@ similar cases, and a summary to send to a councilor. The "Already waiting?" calc
 the same question for any service and wait so far. Switch to Cambridge to run the wait analysis
 on Commonwealth Connect tickets; Cambridge's request types and records stay separate from Boston's.
 
+The Boston calculator shows the historical chance of closure in the next 7 days from the live
+Kaplan–Meier curve. An offline neighborhood model improved the later-sample Brier score by only
+1.3%, below its 5% release threshold, so that control stays hidden. The model artifact records
+the decision; see [the forecast analysis](docs/ANALYSIS.md#closure-forecast).
+
 These figures describe cases opened since July 1, 2026, at the October 24, 2026, 09:01 UTC
 data extract cutoff. The site queries the current dataset when opened, so its numbers may
 differ. [`docs/research/NUMBERS.md`](docs/research/NUMBERS.md) records the snapshot and method.
@@ -68,7 +73,12 @@ npm ci && npm test                                 # includes fast-check propert
 ./scripts/fetch_cohort_cases.sh                    # rebuild fixtures from live data, no key
 python3 scripts/validate_against_lifelines.py      # third opinion vs the standard library
 python3 scripts/check_make_the_case.py              # independent case lookup and Cambridge checks
+python3 scripts/train_closure_forecast.py          # train, test and gate the closure forecast
 ```
+
+The forecast script writes `public/model/boston-closure-forecast.json` (parameters and counts
+only, no case records), `data/forecast_evaluation.json` and the parity fixture that
+`src/lib/closureForecast.test.ts` checks. After 30 days, the page treats the model as stale.
 
 ## Checking this repository with Kiro CLI
 

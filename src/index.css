@@ -112,10 +112,38 @@
   animation: spin 900ms linear infinite;
 }
 
+/* Section headings rise in once, the first time they are reached (see Section.tsx). */
+.reveal {
+  opacity: 0;
+  transform: translateY(12px);
+  transition:
+    opacity 420ms var(--ease-out),
+    transform 420ms var(--ease-out);
+}
+
+.reveal[data-visible='true'] {
+  opacity: 1;
+  transform: none;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Reduced motion keeps the fades that explain a change and drops the movement. */
 @media (prefers-reduced-motion: reduce) {
   .animate-pop-in,
   .animate-rise-in {
-    animation: none;
+    animation: fade-in 200ms ease both;
+  }
+  .reveal {
+    transform: none;
+    transition: opacity 200ms ease;
   }
   .motion-bar {
     transition-duration: 0ms !important;
