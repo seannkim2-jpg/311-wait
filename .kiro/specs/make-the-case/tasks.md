@@ -5,7 +5,7 @@ Deadline 20:00 ET. One commit per step. Cut order at the bottom.
 - [x] **T-1** Check script `scripts/check_make_the_case.py`; first live run passes (MC-01)
 - [x] **T-2** Plan `docs/plans/MAKE-THE-CASE.md`; five-card plan removed
 - [x] **T-3** This spec (requirements, design, tasks)
-- [ ] **T-4** Steering `.kiro/steering/claims.md` (`fileMatch` on `src/components/**`, `docs/**`)
+- [x] **T-4** Steering `.kiro/steering/claims.md` (`fileMatch` on `src/components/**`, `docs/**`)
 - [ ] **T-5** Hooks in `.kiro/hooks/`: claim lint, `npm test` on `src/lib/**`, accessibility review
 - [ ] **T-6** `survivalAt` + `conditionalClose` in `stats.ts`; fast-check properties; golden
       cross-check against the script (MC-05)
