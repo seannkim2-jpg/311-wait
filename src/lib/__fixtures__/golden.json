@@ -1,0 +1,55 @@
+{
+  "_comment": "Golden values from scripts/reference_impl.py, an independent Python implementation run on the real 2026-07-01 cohort. src/lib/stats.ts must reproduce these within tolerance.",
+  "queryTime": "2026-10-24T16:00:00",
+  "cohortStart": "2026-07-01T00:00:00",
+  "services": {
+    "LitterDebris": {
+      "n": 9839,
+      "events": 9435,
+      "censored": 404,
+      "censoredPct": 4.1,
+      "naiveMedianHours": 9.4991,
+      "kmMedianHours": 10.708,
+      "kmFinalSurvival": 0.035587,
+      "cifResolved": 0.800703,
+      "cifAdminClosed": 0.16371,
+      "stillUnresolved": 0.035587
+    },
+    "Pothole": {
+      "n": 2214,
+      "events": 1729,
+      "censored": 485,
+      "censoredPct": 21.9,
+      "naiveMedianHours": 43.8628,
+      "kmMedianHours": 74.1312,
+      "kmFinalSurvival": 0.196155,
+      "cifResolved": 0.64357,
+      "cifAdminClosed": 0.160275,
+      "stillUnresolved": 0.196155
+    },
+    "SidewalkRepair": {
+      "n": 2561,
+      "events": 762,
+      "censored": 1799,
+      "censoredPct": 70.2,
+      "naiveMedianHours": 20.6864,
+      "kmMedianHours": null,
+      "kmFinalSurvival": 0.683353,
+      "cifResolved": 0.176924,
+      "cifAdminClosed": 0.139723,
+      "stillUnresolved": 0.683353
+    },
+    "StreetLightOutage": {
+      "n": 1413,
+      "events": 878,
+      "censored": 535,
+      "censoredPct": 37.9,
+      "naiveMedianHours": 113.8938,
+      "kmMedianHours": 352.1291,
+      "kmFinalSurvival": 0.225996,
+      "cifResolved": 0.704296,
+      "cifAdminClosed": 0.069708,
+      "stillUnresolved": 0.225996
+    }
+  }
+}

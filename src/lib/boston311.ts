@@ -1,0 +1,168 @@
+/**
+ * Boston 311 data access.
+ *
+ * Queries data.boston.gov's CKAN SQL endpoint straight from the browser. It sends
+ * `Access-Control-Allow-Origin: *` and needs no API key, which is why this app has no
+ * backend.
+ */
+
+const RESOURCE = '254adca6-64ab-4c5c-9fc0-a6da622be185'
+const SQL_ENDPOINT = 'https://data.boston.gov/api/3/action/datastore_search_sql'
+
+/**
+ * Cases opened before this date are excluded from every query.
+ *
+ * The resource claims to span 2025-08-01 to now, but it is not a complete record: Sep-2025
+ * holds 418 cases against Sep-2026's 15,573. Early months retain only cases that stayed open
+ * or were touched recently, so they are enriched for slow cases — left truncation plus
+ * selection on survival. July 2026 onward is internally consistent at 13-15k/month.
+ */
+export const COHORT_START = '2026-07-01'
+
+/** Closure reasons that mean the case was closed without being fixed. */
+export const UNRESOLVED_REASONS = ['Noted', 'Transitioned'] as const
+
+export type Cause = 0 | 1 | 2 // 0 censored, 1 resolved, 2 administratively closed
+
+export interface CaseRow {
+  case_status: string
+  closure_reason: string | null
+  open_date: string
+  close_date: string | null
+}
+
+export interface Observation {
+  hours: number
+  cause: Cause
+}
+
+export interface CohortTotals {
+  cohortN: number
+  closed: number
+  openNow: number
+  openOverdue: number
+  closedUnresolved: number
+}
+
+export interface ServiceCount {
+  service_name: string
+  n: number
+}
+
+async function runSql<T>(sql: string): Promise<T[]> {
+  const res = await fetch(`${SQL_ENDPOINT}?sql=${encodeURIComponent(sql)}`)
+  if (!res.ok) throw new Error(`Boston 311 query failed: HTTP ${res.status}`)
+  const body = await res.json()
+  if (!body?.success) {
+    throw new Error(`Boston 311 query rejected: ${body?.error?.message ?? 'unknown error'}`)
+  }
+  return body.result.records as T[]
+}
+
+/** Single-quote escaping for values interpolated into SQL. */
+function quote(value: string): string {
+  return `'${value.replace(/'/g, "''")}'`
+}
+
+const COHORT_FILTER = `open_date::timestamp >= ${quote(COHORT_START)}`
+
+/** The three headline tiles. One round trip. */
+export async function fetchCohortTotals(): Promise<CohortTotals> {
+  const unresolved = UNRESOLVED_REASONS.map(quote).join(',')
+  const rows = await runSql<Record<string, string>>(`
+    SELECT COUNT(*) AS cohort_n,
+           SUM(CASE WHEN case_status='Closed' THEN 1 ELSE 0 END) AS closed,
+           SUM(CASE WHEN case_status='In progress' THEN 1 ELSE 0 END) AS open_now,
+           SUM(CASE WHEN case_status='In progress' AND on_time='OVERDUE' THEN 1 ELSE 0 END) AS open_overdue,
+           SUM(CASE WHEN case_status='Closed' AND closure_reason IN (${unresolved}) THEN 1 ELSE 0 END) AS closed_unresolved
+    FROM "${RESOURCE}"
+    WHERE ${COHORT_FILTER}`)
+  const r = rows[0]
+  return {
+    cohortN: Number(r.cohort_n),
+    closed: Number(r.closed),
+    openNow: Number(r.open_now),
+    openOverdue: Number(r.open_overdue),
+    closedUnresolved: Number(r.closed_unresolved),
+  }
+}
+
+/**
+ * Service types in the cohort, most common first.
+ *
+ * Driving the picker from the data rather than a hardcoded list is deliberate: it answers
+ * the "how do we know you didn't cherry-pick the services" objection.
+ */
+export async function fetchServices(minCases = 200): Promise<ServiceCount[]> {
+  const rows = await runSql<Record<string, string>>(`
+    SELECT service_name, COUNT(*) AS n
+    FROM "${RESOURCE}"
+    WHERE ${COHORT_FILTER} AND case_status IN ('Closed','In progress')
+    GROUP BY service_name
+    HAVING COUNT(*) >= ${Math.floor(minCases)}
+    ORDER BY n DESC`)
+  return rows.map((r) => ({ service_name: r.service_name, n: Number(r.n) }))
+}
+
+/** Raw case rows for one service. Durations are computed client-side. */
+export async function fetchServiceCases(serviceName: string, limit = 32000): Promise<CaseRow[]> {
+  return runSql<CaseRow>(`
+    SELECT case_status, closure_reason, open_date, close_date
+    FROM "${RESOURCE}"
+    WHERE ${COHORT_FILTER}
+      AND service_name = ${quote(serviceName)}
+      AND case_status IN ('Closed','In progress')
+    LIMIT ${Math.floor(limit)}`)
+}
+
+/** On-time counts per neighborhood, for the Wilson-interval table. */
+export async function fetchNeighborhoodOnTime(serviceName: string) {
+  const rows = await runSql<Record<string, string>>(`
+    SELECT neighborhood,
+           COUNT(*) AS n,
+           SUM(CASE WHEN on_time='ONTIME' THEN 1 ELSE 0 END) AS ontime
+    FROM "${RESOURCE}"
+    WHERE ${COHORT_FILTER}
+      AND service_name = ${quote(serviceName)}
+      AND case_status='Closed'
+      AND neighborhood IS NOT NULL
+    GROUP BY neighborhood
+    ORDER BY n DESC`)
+  return rows.map((r) => ({
+    neighborhood: r.neighborhood,
+    n: Number(r.n),
+    onTime: Number(r.ontime),
+  }))
+}
+
+function parseTimestamp(ts: string): number {
+  // CKAN returns "2026-07-14 10:56:30.994145+00"; make it ISO-8601 so Date can read it.
+  const iso = ts.trim().replace(' ', 'T').replace(/\+00$/, 'Z')
+  const ms = Date.parse(iso.endsWith('Z') ? iso : `${iso}Z`)
+  if (Number.isNaN(ms)) throw new Error(`Unparseable timestamp: ${ts}`)
+  return ms
+}
+
+/**
+ * Turn raw rows into survival observations.
+ *
+ * Closed cases are events, dated by `close_date`. Cases still in progress are censored at
+ * `queryTime`. A closure reason of Noted or Transitioned is a *competing event* (cause 2),
+ * not censoring — treating it as censored would assume the case would eventually be fixed.
+ */
+export function toObservations(rows: CaseRow[], queryTime = Date.now()): Observation[] {
+  const out: Observation[] = []
+  const unresolved = new Set<string>(UNRESOLVED_REASONS)
+  for (const row of rows) {
+    const opened = parseTimestamp(row.open_date)
+    if (row.case_status === 'Closed' && row.close_date) {
+      const hours = (parseTimestamp(row.close_date) - opened) / 3_600_000
+      if (hours < 0) continue // clock-skew rows; dropping is safer than clamping to 0
+      out.push({ hours, cause: unresolved.has(row.closure_reason ?? '') ? 2 : 1 })
+    } else if (row.case_status === 'In progress') {
+      const hours = (queryTime - opened) / 3_600_000
+      if (hours >= 0) out.push({ hours, cause: 0 })
+    }
+  }
+  return out
+}
