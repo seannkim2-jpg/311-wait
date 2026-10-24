@@ -1,0 +1,16 @@
+{
+  "version": "v1",
+  "hooks": [
+    {
+      "name": "a11y-review-on-component-save",
+      "description": "Review each saved component for keyboard access, labels and contrast",
+      "trigger": "PostFileSave",
+      "matcher": "(^|/)src/components/",
+      "action": {
+        "type": "agent",
+        "prompt": "A component under src/components/ was just saved. Using .kiro/skills/frontend-a11y/SKILL.md, review only that file for: every control reachable and operable by keyboard with a visible focus style; every input with a visible <label> and errors tied by aria-describedby; buttons named by their text or aria-label; status changes (loading, copied, not found) announced through an aria-live region; colour never the only signal; text colours from tailwind.config.js (ink, ink-2, ink-3 meet 4.5:1 on white and mist); hit areas at least 40px; and no fixed widths that would scroll horizontally at 390px. Fix what you find, and list anything you could not fix."
+      },
+      "enabled": true
+    }
+  ]
+}

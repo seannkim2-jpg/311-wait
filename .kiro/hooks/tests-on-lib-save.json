@@ -1,0 +1,16 @@
+{
+  "version": "v1",
+  "hooks": [
+    {
+      "name": "tests-on-lib-save",
+      "description": "Rerun the statistics and data-layer tests whenever src/lib changes",
+      "trigger": "PostFileSave",
+      "matcher": "(^|/)src/lib/",
+      "action": {
+        "type": "agent",
+        "prompt": "A file under src/lib/ was just saved. Run `npm test`. If any test fails, find the cause in the code that changed and fix the code. Do not loosen a fast-check property, a tolerance or a golden value to make a test pass; if a property itself is wrong, say why before changing it. The existing estimators in src/lib/stats.ts (kaplanMeier, aalenJohansen, wilson, naiveMedian, logRank, benjaminiHochberg) must not change behaviour."
+      },
+      "enabled": true
+    }
+  ]
+}
