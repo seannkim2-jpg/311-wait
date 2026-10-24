@@ -27,6 +27,21 @@ censoring counts and confidence intervals, and says where the data cannot answer
 - [`docs/ROADMAP.md`](docs/ROADMAP.md) — status and what to build on
 - [`docs/UI-DESIGN.md`](docs/UI-DESIGN.md) — interface brief
 - [`docs/PLAN.md`](docs/PLAN.md) — schedule and agent boundaries
+- [`docs/research/`](docs/research/) — how the concept was chosen, checked, and corrected
+
+## Working on this in Kiro
+
+```bash
+git clone https://github.com/seannkim2-jpg/kiro-hackachusetts.git
+cd kiro-hackachusetts && npm install
+kiro .            # IDE, or:
+kiro-cli chat     # CLI from the repo root
+```
+
+Kiro picks up `.kiro/steering/` automatically. Two files load in every session:
+`hackathon.md` carries the rules and judging criteria, and `data-facts.md` carries the
+verified figures and the claims the data cannot support. Start from
+[`.kiro/specs/service-wait-audit/tasks.md`](.kiro/specs/service-wait-audit/tasks.md).
 
 ## Verifying the statistics
 
