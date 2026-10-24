@@ -40,6 +40,7 @@ export function OutcomeChart({ audit, citywideShare, citywideClosed }: {
   const reduced = usePrefersReducedMotion()
   const { ref, seen } = useInViewOnce<HTMLDivElement>()
   const o = audit.outcomes
+  if (!o) return null // only rendered for cities that publish a closure reason
   const shares = { resolved: o.resolved, notResolved: o.notResolved, stillOpen: o.stillOpen }
   const summary = `${audit.service}, after up to ${Math.floor(audit.maxDay)} days: ${formatNumber(o.resolved * 100, 1)}% resolved, ${formatNumber(o.notResolved * 100, 1)}% closed as Noted or Transitioned, ${formatNumber(o.stillOpen * 100, 1)}% still open.`
 

@@ -43,8 +43,8 @@ export interface CohortTotals {
   cohortN: number
   closed: number
   openNow: number
-  openOverdue: number
-  closedUnresolved: number
+  openOverdue: number | null
+  closedUnresolved: number | null
 }
 
 export interface ServiceCount {

@@ -1,4 +1,4 @@
-# Wait Audit: look, feel and skills plan
+# 311 Wait: look, feel and skills plan
 
 Status: **approved 2026-10-24 and built** on `wait-audit-ui`. All 12 skills in §1 are installed
 in `.kiro/skills/`. §7 records the decisions the team made; where they differ from the first

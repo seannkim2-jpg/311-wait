@@ -25,7 +25,7 @@ Here is the complete product definition. Everything concrete and buildable.
 
 ---
 
-## 1. Name → **Wait Audit**
+## 1. Name → **311 Wait**
 
 "A statistically honest account of how long Bostonians actually wait for 311 service requests to close."
 
@@ -35,7 +35,7 @@ Rejected "Dashboard" (implies live ops monitoring, not an audit). Rejected "Clea
 
 ## 2. One-sentence product definition
 
-Wait Audit is a browser-only statistical audit for Boston residents and journalists that shows, service type by service type, how much the city's published 311 on-time rate and median closure time understate the true wait — because 7,840 cases are still open and the ones still open are disproportionately the slow ones.
+311 Wait is a browser-only statistical audit for Boston residents and journalists that shows, service type by service type, how much the city's published 311 on-time rate and median closure time understate the true wait — because 7,840 cases are still open and the ones still open are disproportionately the slow ones.
 
 ---
 

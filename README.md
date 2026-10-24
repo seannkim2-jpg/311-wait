@@ -1,4 +1,4 @@
-# Wait Audit
+# 311 Wait
 
 > **Track:** Civic Action
 >
@@ -10,7 +10,7 @@ When you file a 311 request in Boston, how long will you wait? Taking the median
 cases gives a quick answer, but it leaves out the 7,876 requests still open, and those are
 disproportionately the slow ones.
 
-Wait Audit puts them back in. It queries Boston's live open-data endpoint from the browser with
+311 Wait puts them back in. It queries Boston's live open-data endpoint from the browser with
 no API key and no backend, then applies survival analysis: Kaplan–Meier for time-to-closure
 with open cases included, and Aalen–Johansen competing-risks incidence to separate cases closed
 as resolved from cases closed as `Noted` ("no action is required") or `Transitioned`
@@ -25,6 +25,11 @@ than `Resolved`.
 
 It makes no causal claim about why. It audits the measurement, shows its sample sizes,
 censoring counts and confidence intervals, and says where the data cannot answer.
+
+You can enter a Boston case number to see its status, a historical 14-day closure chance for
+similar cases, and a summary to send to a councilor. The "Already waiting?" calculator answers
+the same question for any service and wait so far. Switch to Cambridge to run the wait analysis
+on Commonwealth Connect tickets; Cambridge's request types and records stay separate from Boston's.
 
 These figures describe cases opened since July 1, 2026, at the October 24, 2026, 09:01 UTC
 data extract cutoff. The site queries the current dataset when opened, so its numbers may
@@ -41,15 +46,15 @@ differ. [`docs/research/NUMBERS.md`](docs/research/NUMBERS.md) records the snaps
 ## Working on this in Kiro
 
 ```bash
-git clone https://github.com/seannkim2-jpg/kiro-hackachusetts.git
-cd kiro-hackachusetts && npm ci
+git clone https://github.com/seannkim2-jpg/311-wait.git
+cd 311-wait && npm ci
 kiro .            # IDE, or:
 kiro-cli chat     # CLI from the repo root
 ```
 
-Kiro picks up `.kiro/steering/` automatically. Two files load in every session:
-`hackathon.md` carries the rules and judging criteria, and `data-facts.md` carries the
-verified figures and the claims the data cannot support. Start from
+Kiro picks up `.kiro/steering/` automatically. `hackathon.md` carries the rules and judging
+criteria, `data-facts.md` carries verified figures, and `claims.md` loads the wording rules when
+editing the page or docs. Start from
 [`.kiro/specs/service-wait-audit/tasks.md`](.kiro/specs/service-wait-audit/tasks.md).
 
 ## Verifying the statistics
@@ -62,6 +67,7 @@ python3 scripts/refresh_numbers.py                 # re-pull every figure, self-
 npm ci && npm test                                 # includes fast-check properties
 ./scripts/fetch_cohort_cases.sh                    # rebuild fixtures from live data, no key
 python3 scripts/validate_against_lifelines.py      # third opinion vs the standard library
+python3 scripts/check_make_the_case.py              # independent case lookup and Cambridge checks
 ```
 
 ## Checking this repository with Kiro CLI
@@ -79,12 +85,12 @@ another Git checkout too, pass both paths: `./scripts/check-with-kiro.sh . /path
 
 ## Running it
 
-No account, API key or backend. The page queries Boston's open-data API from the browser, and
+No account, API key or backend. The page queries each city's open-data API from the browser, and
 the map's basemap, boundaries and fonts are committed as static files in `public/map/`.
 
 ```bash
-git clone https://github.com/seannkim2-jpg/kiro-hackachusetts.git
-cd kiro-hackachusetts
+git clone https://github.com/seannkim2-jpg/311-wait.git
+cd 311-wait
 npm ci
 npm run build && npm run preview   # production build at http://localhost:4173
 # or: npm run dev                  # development server
@@ -116,8 +122,8 @@ This project is built with [Kiro](https://kiro.dev). Team setup instructions are
 is in [`docs/KIRO-USAGE.md`](docs/KIRO-USAGE.md).
 
 [OpenAI Codex](https://openai.com/codex/) contributed repository review and build, lint,
-and clean-checkout test fixes ([PR #5](https://github.com/seannkim2-jpg/kiro-hackachusetts/pull/5),
-[PR #6](https://github.com/seannkim2-jpg/kiro-hackachusetts/pull/6)).
+and clean-checkout test fixes ([PR #5](https://github.com/seannkim2-jpg/311-wait/pull/5),
+[PR #6](https://github.com/seannkim2-jpg/311-wait/pull/6)).
 
 `/.kiro` at the repo root is required evidence for judging and must never be added to
 `.gitignore`.

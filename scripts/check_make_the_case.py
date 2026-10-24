@@ -140,7 +140,11 @@ def cambridge(query):
 def parse_boston(ts):
     s = ts.strip().replace(" ", "T")
     s = re.sub(r"\+00(:00)?$", "", s)
-    return dt.datetime.fromisoformat(s[:26])
+    # Python 3.9 rejects five-digit fractions from CKAN; strptime accepts them.
+    try:
+        return dt.datetime.strptime(s[:26], "%Y-%m-%dT%H:%M:%S.%f")
+    except ValueError:
+        return dt.datetime.strptime(s[:19], "%Y-%m-%dT%H:%M:%S")
 
 
 def boston_obs(rows, cutoff):

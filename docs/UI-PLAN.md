@@ -1,4 +1,4 @@
-# Wait Audit — website & architecture plan
+# 311 Wait — website & architecture plan
 
 Status: **planning only. Do not deploy from this yet.** This is the agreed plan for the public
 website. It builds on [`UI-DESIGN.md`](./UI-DESIGN.md) (interface brief) and
@@ -35,7 +35,7 @@ The official site pairs the Boston 311 dataset with these two challenges (paraph
 - **V2 · Responsive and resilient communities.** The context line says that *volume hides who
   is waiting.*
 
-Wait Audit maps onto this directly. The survival analysis provides the **service
+311 Wait maps onto this directly. The survival analysis provides the **service
 transparency** (a median over closed cases leaves out the people still waiting). The God's-eye map
 shows the **geographic pattern** (where those open cases are right now).
 
@@ -45,7 +45,7 @@ shows the **geographic pattern** (where those open cases are right now).
 
 A median closure time taken over closed cases only leaves out the thousands of 311 requests
 still open, which tend to be the slow ones. (This is not a claim about how the city computes
-anything; see `docs/research/claim-check.md`.) **Wait Audit puts them back in.** It applies **Kaplan–Meier**
+anything; see `docs/research/claim-check.md`.) **311 Wait puts them back in.** It applies **Kaplan–Meier**
 to time-to-closure, counting still-open cases as censored, and **Aalen–Johansen**
 competing-risks incidence to separate requests closed as *resolved* from those closed as
 `Noted` (no action required) or `Transitioned` (reassigned to another agency). It then maps where the open and overdue cases are

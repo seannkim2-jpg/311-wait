@@ -1,8 +1,11 @@
 import type { ServiceCount } from '../lib/boston311'
 import type { ServiceAudit } from '../data/audit'
+import { CITIES, CITY_KEYS, type CityKey } from '../data/cities'
 import { formatQueried, formatWait } from '../data/format'
 
 interface Props {
+  city: CityKey
+  onCity: (city: CityKey) => void
   queriedAt: Date | null
   compact: boolean
   audit: ServiceAudit | null
@@ -13,32 +16,55 @@ interface Props {
 }
 
 /**
- * Sticky header. Once the answer has scrolled away, a compact summary slides in with a native
- * select, so the one control that drives the page is reachable from anywhere.
+ * Sticky header. The city switch stays visible at every width — it changes which dataset the
+ * whole page reads. Once the answer has scrolled away, a compact summary slides in with a
+ * native select, so the control that drives the page is reachable from anywhere.
  */
-export function SiteHeader({ queriedAt, compact, audit, services, selected, loading, onSelect }: Props) {
+export function SiteHeader({ city, onCity, queriedAt, compact, audit, services, selected, loading, onSelect }: Props) {
   return (
     <header className="sticky top-0 z-40 border-b border-rule/80 bg-white/85 backdrop-blur-md supports-[backdrop-filter]:bg-white/70">
-      <div className="mx-auto flex h-16 max-w-page items-center gap-4 px-5 sm:px-8">
+      <div className="mx-auto flex h-16 max-w-page items-center gap-3 px-5 sm:gap-4 sm:px-8">
         <a href="#answer" className="flex shrink-0 items-center gap-2.5 rounded-md">
           <svg aria-hidden viewBox="0 0 32 32" className="h-7 w-7">
             <rect width="32" height="32" rx="9" fill="#15171C" />
             <rect x="7" y="18" width="7" height="6" rx="2" fill="#7A818D" />
             <rect x="7" y="9" width="18" height="6" rx="2" fill="#fff" />
           </svg>
-          <span className="font-display text-lg font-bold tracking-[-0.02em]">Wait Audit</span>
+          <span className="font-display text-lg font-bold tracking-[-0.02em]">311 Wait</span>
         </a>
 
         <div
+          role="group"
+          aria-label="City"
+          className="flex shrink-0 gap-1 rounded-full bg-mist p-1"
+        >
+          {CITY_KEYS.map((key) => (
+            <button
+              key={key}
+              type="button"
+              aria-pressed={city === key}
+              onClick={() => onCity(key)}
+              className={[
+                'min-h-[36px] rounded-full px-3 text-sm font-semibold',
+                'transition-colors duration-150 active:scale-[0.97]',
+                city === key ? 'bg-ink text-white' : 'text-ink-2 hover:text-ink',
+              ].join(' ')}
+            >
+              {CITIES[key].name}
+            </button>
+          ))}
+        </div>
+
+        <div
           className={[
-            'hidden min-w-0 flex-1 items-center justify-center gap-3 md:flex',
+            'hidden min-w-0 flex-1 items-center justify-center gap-3 lg:flex',
             'transition-[opacity,transform] duration-200 ease-out motion-reduce:transition-none',
             compact ? 'translate-y-0 opacity-100' : 'pointer-events-none -translate-y-2 opacity-0',
           ].join(' ')}
           aria-hidden={!compact}
         >
           <label className="sr-only" htmlFor="compact-service">
-            Service type
+            {CITIES[city].typeWord}
           </label>
           <select
             id="compact-service"
@@ -61,13 +87,13 @@ export function SiteHeader({ queriedAt, compact, audit, services, selected, load
                   ? formatWait(audit.kmMedianHours)
                   : `${Math.floor(audit.maxDay)}+ days`}
               </span>{' '}
-              counting open cases · closed only {formatWait(audit.cityMedianHours)}
+              counting open {CITIES[city].caseWord[1]} · closed only {formatWait(audit.cityMedianHours)}
             </p>
           )}
         </div>
 
-        <p className="figure ml-auto shrink-0 text-right text-xs leading-tight text-ink-3 sm:text-sm">
-          <span className="block sm:inline">data.boston.gov</span>
+        <p className="figure ml-auto hidden shrink-0 text-right text-xs leading-tight text-ink-3 sm:block sm:text-sm">
+          <span className="block sm:inline">{CITIES[city].source}</span>
           <span className="hidden sm:inline"> · </span>
           <span className="block sm:inline">{queriedAt ? `queried ${formatQueried(queriedAt)}` : 'connecting…'}</span>
         </p>

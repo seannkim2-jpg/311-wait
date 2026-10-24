@@ -1,6 +1,6 @@
 # How we used Kiro
 
-Wait Audit was built in one day by one person working with Kiro and two other AI assistants.
+311 Wait was built in one day by one person working with Kiro and two other AI assistants.
 The approach: Kiro writes the spec and the statistics; a separate assistant writes an
 independent reference implementation; the two have to agree. Kiro's numbers and claims were
 checked against the live data, and a script now repeats that check on every figure. The places where that check changed something are

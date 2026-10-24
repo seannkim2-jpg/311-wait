@@ -1,11 +1,10 @@
 import { useMemo, useRef, useState, type KeyboardEvent } from 'react'
 import type { ServiceCount } from '../lib/boston311'
+import type { City } from '../data/cities'
 import { formatInt } from '../data/format'
 
-/** Shown first; every other service in the data sits behind "More services". */
-const FEATURED = ['Street Light Outage', 'Sidewalk Repair', 'Pothole', 'Litter & Debris']
-
 interface Props {
+  city: City
   services: ServiceCount[]
   selected: string
   loading: boolean
@@ -17,18 +16,18 @@ interface Props {
  * While a service loads the chips stay focusable but inert (`aria-disabled`), so keyboard
  * focus is never thrown away mid-interaction.
  */
-export function ServicePicker({ services, selected, loading, onSelect }: Props) {
+export function ServicePicker({ city, services, selected, loading, onSelect }: Props) {
   const [expanded, setExpanded] = useState(false)
   const refs = useRef<(HTMLButtonElement | null)[]>([])
 
   const { featured, rest } = useMemo(() => {
     const names = new Set(services.map((s) => s.service_name))
-    const featuredList = FEATURED.filter((f) => names.has(f)).map(
-      (f) => services.find((s) => s.service_name === f)!,
-    )
-    const restList = services.filter((s) => !FEATURED.includes(s.service_name))
+    const featuredList = city.featured
+      .filter((f) => names.has(f))
+      .map((f) => services.find((s) => s.service_name === f)!)
+    const restList = services.filter((s) => !city.featured.includes(s.service_name))
     return { featured: featuredList, rest: restList }
-  }, [services])
+  }, [services, city])
 
   // If the selected service lives in the overflow, keep the overflow open.
   const showAll = expanded || rest.some((s) => s.service_name === selected)
@@ -65,7 +64,7 @@ export function ServicePicker({ services, selected, loading, onSelect }: Props) 
     <div className="relative">
       <div
         role="toolbar"
-        aria-label="Choose a service type"
+        aria-label={`Choose from ${city.typeWord}s`}
         aria-busy={loading}
         onKeyDown={onKeyDown}
         className="flex flex-wrap items-center gap-2"
@@ -122,13 +121,13 @@ export function ServicePicker({ services, selected, loading, onSelect }: Props) 
             onClick={() => setExpanded((v) => !v)}
             className="inline-flex min-h-[44px] items-center gap-1.5 rounded-full px-4 text-[0.9375rem] font-medium text-data underline-offset-4 hover:underline"
           >
-            {showAll ? 'Fewer services' : `${rest.length} more services`}
+            {showAll ? 'Fewer options' : `${rest.length} more ${city.typeWord}s`}
           </button>
         )}
       </div>
       {loading && (
         <p className="mt-3 text-sm text-ink-3" aria-hidden>
-          Loading live data from data.boston.gov…
+          Loading live data from {city.source}…
         </p>
       )}
     </div>

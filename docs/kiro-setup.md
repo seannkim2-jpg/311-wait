@@ -21,8 +21,8 @@ kiro-cli doctor                                   # verifies the install
 ## 3. Open this repo
 
 ```bash
-git clone https://github.com/seannkim2-jpg/kiro-hackachusetts.git
-cd kiro-hackachusetts
+git clone https://github.com/seannkim2-jpg/311-wait.git
+cd 311-wait
 kiro .            # IDE, or:
 kiro-cli chat     # CLI in the repo root
 ```

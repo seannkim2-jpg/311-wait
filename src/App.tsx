@@ -1,5 +1,6 @@
 import { Suspense, lazy, useCallback, useEffect, useRef, useState } from 'react'
 import { loadOverview, loadServiceAudit, type Overview, type ServiceAudit } from './data/audit'
+import { CITIES, type CityKey } from './data/cities'
 import { formatWait, inSentence } from './data/format'
 import { SiteHeader } from './components/SiteHeader'
 import { Hero } from './components/Hero'
@@ -15,12 +16,13 @@ import { Cambridge } from './components/Cambridge'
 // MapLibre is the heaviest dependency; load it after the answer has painted.
 const CityMap = lazy(() => import('./components/map/CityMap'))
 
-/** REQ-10: first load shows Street Light Outage. */
-const DEFAULT_SERVICE = 'Street Light Outage'
+/** REQ-10: first load shows Boston's Street Light Outage. */
+const DEFAULT_CITY: CityKey = 'boston'
 
 export default function App() {
+  const [cityKey, setCityKey] = useState<CityKey>(DEFAULT_CITY)
   const [overview, setOverview] = useState<Overview | null>(null)
-  const [service, setService] = useState(DEFAULT_SERVICE)
+  const [service, setService] = useState(CITIES[DEFAULT_CITY].defaultService)
   const [audit, setAudit] = useState<ServiceAudit | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -28,24 +30,36 @@ export default function App() {
   const [attempt, setAttempt] = useState(0)
   const heroEndRef = useRef<HTMLDivElement | null>(null)
   const [compact, setCompact] = useState(false)
+  const city = CITIES[cityKey]
 
   useEffect(() => {
-    loadOverview()
-      .then(setOverview)
-      .catch((e: Error) => setError(e.message))
-  }, [attempt])
+    let alive = true
+    setOverview(null)
+    loadOverview(cityKey)
+      .then((o) => {
+        if (alive) setOverview(o)
+      })
+      .catch((e: Error) => {
+        if (alive) setError(e.message)
+      })
+    return () => {
+      alive = false
+    }
+  }, [cityKey, attempt])
 
   useEffect(() => {
     let alive = true
     setLoading(true)
     setError(null)
-    loadServiceAudit(service)
+    loadServiceAudit(cityKey, service)
       .then((a) => {
         if (!alive) return
         setAudit(a)
         setLoading(false)
         const real = a.kmMedianHours !== null ? `${formatWait(a.kmMedianHours)} until half are closed` : 'Fewer than half have ever closed'
-        setAnnouncement(`Now showing ${a.service}. ${real}; closed cases alone say ${formatWait(a.cityMedianHours)}.`)
+        setAnnouncement(
+          `Now showing ${a.service} in ${CITIES[a.city].name}. ${real}; closed ${CITIES[a.city].caseWord[1]} alone say ${formatWait(a.cityMedianHours)}.`,
+        )
       })
       .catch((e: Error) => {
         if (!alive) return
@@ -55,7 +69,7 @@ export default function App() {
     return () => {
       alive = false
     }
-  }, [service, attempt])
+  }, [cityKey, service, attempt])
 
   // The compact header summary appears once the answer block leaves the viewport.
   useEffect(() => {
@@ -67,6 +81,12 @@ export default function App() {
   }, [])
 
   const select = useCallback((s: string) => setService(s), [])
+  // Service names are each city's own, so switching city has to reset the selection.
+  const selectCity = useCallback((key: CityKey) => {
+    setCityKey(key)
+    setService(CITIES[key].defaultService)
+    setAudit(null)
+  }, [])
   const retry = () => setAttempt((n) => n + 1)
   const svc = audit?.service ?? service
 
@@ -76,6 +96,8 @@ export default function App() {
         Skip to the answer
       </a>
       <SiteHeader
+        city={cityKey}
+        onCity={selectCity}
         queriedAt={audit?.queriedAt ?? overview?.queriedAt ?? null}
         compact={compact}
         audit={audit}
@@ -93,7 +115,7 @@ export default function App() {
           <div role="alert" className="mx-auto mt-6 max-w-page px-5 sm:px-8">
             <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-overdue/30 bg-overdue-soft px-5 py-4 text-[0.9375rem]">
               <p>
-                <strong className="font-semibold">Boston&rsquo;s open-data service did not respond.</strong>{' '}
+                <strong className="font-semibold">{city.name}&rsquo;s open-data service did not respond.</strong>{' '}
                 <span className="text-ink-2">{error}</span>
               </p>
               <button type="button" onClick={retry} className="min-h-[40px] rounded-full bg-ink px-4 font-semibold text-white active:scale-[0.96]">
@@ -103,27 +125,50 @@ export default function App() {
           </div>
         )}
 
-        <Hero overview={overview} audit={audit} selected={service} loading={loading} onSelect={select} />
+        <Hero city={city} overview={overview} audit={audit} selected={service} loading={loading} onSelect={select} />
         <div ref={heroEndRef} aria-hidden />
 
-        <Section
-          id="my-case"
-          title="Where does my case stand?"
-          lede="Type your case number to see how long it has been open, what happened to similar cases at the same age, and a short summary you can send to someone who can act on it."
-        >
-          <CaseLookup />
-        </Section>
+        {cityKey === 'boston' && (
+          <Section
+            id="my-case"
+            title="Where does my case stand?"
+            lede="Type your case number to see how long it has been open, what happened to similar cases at the same age, and a short summary you can send to someone who can act on it."
+          >
+            <CaseLookup />
+          </Section>
+        )}
 
-        <Section
-          id="map"
-          tone="mist"
-          title="Where people are waiting right now"
-          lede="Each circle is a neighborhood. Its size is the number of requests open today; the solid core is the part already past the city's own deadline. Select a neighborhood to compare."
-        >
-          <Suspense fallback={<div className="h-[560px] rounded-3xl border border-rule bg-white" />}>
-            <CityMap service={service} />
-          </Suspense>
-        </Section>
+        {cityKey === 'cambridge' && (
+          <Section
+            id="cambridge"
+            tone="mist"
+            title="Cambridge, all requests"
+            lede="See the wait across all Commonwealth Connect request types, or choose a type. The detailed view below starts with Tree Pruning Request."
+          >
+            <Cambridge />
+          </Section>
+        )}
+
+        {city.caveat && (
+          <p className="mx-auto max-w-page px-5 sm:px-8">
+            <span className="block max-w-[70ch] rounded-2xl border-l-4 border-notfixed bg-[#FBF4EA] px-5 py-4 text-[0.9375rem] leading-relaxed text-ink">
+              {city.caveat}
+            </span>
+          </p>
+        )}
+
+        {city.hasMap && (
+          <Section
+            id="map"
+            tone="mist"
+            title="Where people are waiting right now"
+            lede="Each circle is a neighborhood. Its size is the number of requests open today; the solid core is the part already past the city's own deadline. Select a neighborhood to compare."
+          >
+            <Suspense fallback={<div className="h-[560px] rounded-3xl border border-rule bg-white" />}>
+              <CityMap service={service} />
+            </Suspense>
+          </Section>
+        )}
 
         {audit && (
           <>
@@ -133,56 +178,54 @@ export default function App() {
               lede={
                 <>
                   Of every 100 {inSentence(svc)} requests, how many are still not closed after a given
-                  number of days. The dashed line looks only at cases that have already
+                  number of days. The dashed line looks only at {city.caseWord[1]} that have already
                   closed.
                 </>
               }
             >
               <SurvivalChart audit={audit} />
               <p className="mt-6 max-w-[70ch] rounded-2xl border-l-4 border-notfixed bg-[#FBF4EA] px-5 py-4 text-[0.9375rem] leading-relaxed text-ink">
-                Kaplan–Meier assumes cases still open are a random sample of open cases with respect
-                to eventual close time. If the city defers difficult cases, our estimate is{' '}
-                <strong>optimistic</strong> — the true wait is longer.
+                Kaplan–Meier assumes {city.caseWord[1]} still open are a random sample of open{' '}
+                {city.caseWord[1]} with respect to eventual close time. If the city defers difficult{' '}
+                {city.caseWord[1]}, our estimate is <strong>optimistic</strong> — the true wait is
+                longer.
               </p>
               <div className="mt-12">
                 <BiasCallout audit={audit} />
               </div>
             </Section>
 
-            <Section
-              id="outcomes"
-              title="What happens to a report"
-              lede={`Closing a case is not the same as resolving it. This is every ${inSentence(svc)} request, split by how it ended: closed as resolved, closed as Noted (no action required) or Transitioned (reassigned to another agency), or still open.`}
-            >
-              <OutcomeChart
-                audit={audit}
-                citywideShare={overview ? overview.closedUnresolved / overview.closed : null}
-                citywideClosed={overview?.closed ?? null}
-              />
-            </Section>
+            {city.hasOutcomes && (
+              <Section
+                id="outcomes"
+                title="What happens to a report"
+                lede={`Closing a case is not the same as resolving it. This is every ${inSentence(svc)} request, split by how it ended: closed as resolved, closed as Noted (no action required) or Transitioned (reassigned to another agency), or still open.`}
+              >
+                <OutcomeChart
+                  audit={audit}
+                  citywideShare={
+                    overview && overview.closedUnresolved !== null ? overview.closedUnresolved / overview.closed : null
+                  }
+                  citywideClosed={overview?.closed ?? null}
+                />
+              </Section>
+            )}
 
-            <Section
-              id="neighborhoods"
-              tone="mist"
-              title="On time, by neighborhood"
-              lede={`The share of closed ${inSentence(svc)} cases that met the city's own target, with a 95% range. It counts closed cases only.`}
-            >
-              <NeighborhoodTable rows={audit.neighborhoods} service={svc} />
-            </Section>
+            {city.hasNeighborhoods && (
+              <Section
+                id="neighborhoods"
+                tone="mist"
+                title="On time, by neighborhood"
+                lede={`The share of closed ${inSentence(svc)} cases that met the city's own target, with a 95% range. It counts closed cases only.`}
+              >
+                <NeighborhoodTable rows={audit.neighborhoods} service={svc} />
+              </Section>
+            )}
           </>
         )}
 
-        <Section
-          id="cambridge"
-          tone="mist"
-          title="Cambridge, same check"
-          lede="Cambridge publishes its 311 requests too. The same comparison on Cambridge's own data: the median among closed tickets next to the estimate including the tickets still open."
-        >
-          <Cambridge />
-        </Section>
-
         <Section id="method" title="How we counted">
-          <Method overview={overview} audit={audit} />
+          <Method city={city} overview={overview} audit={audit} />
         </Section>
       </main>
       <Footer />

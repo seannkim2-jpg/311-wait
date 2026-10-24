@@ -164,7 +164,7 @@ export async function lookUpCase(caseId: string, siteUrl: string): Promise<Looku
   const opened = parseTimestamp(record.open_date)
   if (opened < Date.parse(`${COHORT_START}T00:00:00Z`)) return { kind: 'before-cohort', id: caseId, record }
 
-  const audit = await loadServiceAudit(record.service_name)
+  const audit = await loadServiceAudit('boston', record.service_name)
   const cutoff = audit.cutoff
   const target = record.target_close_date ? parseTimestamp(record.target_close_date) : null
   const closedAt = record.case_status === 'Closed' && record.close_date ? parseTimestamp(record.close_date) : null

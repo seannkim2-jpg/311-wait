@@ -8,20 +8,20 @@ Deadline: 20:00 ET tonight
 
 ## 1. Name
 
-**Wait Audit**  
-*Candidate A:* **Wait Audit** — "A statistically honest account of how long Bostonians actually wait for 311 service requests to close."  
+**311 Wait**
+*Candidate A:* **311 Wait** — "A statistically honest account of how long Bostonians actually wait for 311 service requests to close."
 *Candidate B:* **ClearTime** — "Boston 311 wait times, corrected for the cases still sitting open."  
 *Candidate C:* **311 Reckoning** — "The wait times Boston reports, the wait times people actually experience, and the gap between them."
 
-**Chosen: Wait Audit.**
+**Chosen: 311 Wait.**
 
-Why: "Audit" names the action precisely — we are checking official numbers against a corrected estimate and finding they fall short. "Dashboard" implies live operational monitoring; this is a one-time statistical correction of a published metric. "Reckoning" is dramatic but vague. "ClearTime" is marketable but tells a judge nothing before they click. "Wait Audit" is literal, credible, and search-friendly.
+Why: "Audit" names the action precisely — we are checking official numbers against a corrected estimate and finding they fall short. "Dashboard" implies live operational monitoring; this is a one-time statistical correction of a published metric. "Reckoning" is dramatic but vague. "ClearTime" is marketable but tells a judge nothing before they click. "311 Wait" is literal, credible, and search-friendly.
 
 ---
 
 ## 2. One-sentence product definition
 
-**Wait Audit** is a browser-only statistical audit for Boston residents and journalists that shows, service type by service type, how much the city's published 311 on-time rate and median closure time understate the true wait — because 7,840 cases are still open and the ones still open are disproportionately the slow ones.
+**311 Wait** is a browser-only statistical audit for Boston residents and journalists that shows, service type by service type, how much the city's published 311 on-time rate and median closure time understate the true wait — because 7,840 cases are still open and the ones still open are disproportionately the slow ones.
 
 ---
 
@@ -33,7 +33,7 @@ One screen. No routing. No modals. Scroll-based layout, ~2,400 px total height o
 
 | Zone | Content |
 |---|---|
-| Header bar | App name "Wait Audit", sub-line "Boston 311 service requests · data.boston.gov · queried [timestamp]", GitHub link |
+| Header bar | App name "311 Wait", sub-line "Boston 311 service requests · data.boston.gov · queried [timestamp]", GitHub link |
 | Lede numbers strip | Three stat tiles in a row (exact values in §4) |
 | Service type picker | Horizontal chip row: Street Light Outage · Sidewalk Repair · Pothole · Domestic Animal Issue · Pruning Request · Illegal Graffiti · (All services). Default: Street Light Outage. |
 | KM chart | Survival curve panel: KM curve (solid) + naive ECDF (dashed) + shaded Greenwood CI. X-axis: days from open. Y-axis: proportion not yet closed. Vertical dashed line at KM median. |
@@ -118,7 +118,7 @@ KM medians and Wilson CIs are computed at build time. Note: South Boston Waterfr
 
 A judge lands on the page and sees, within three seconds without scrolling or clicking:
 
-1. Header: "Wait Audit — Boston 311 service requests · data.boston.gov · queried [timestamp]"
+1. Header: "311 Wait — Boston 311 service requests · data.boston.gov · queried [timestamp]"
 2. Three stat tiles: 7,840 open & overdue · ~23% closed without resolution · [X] days underreported wait
 3. Service picker with "Street Light Outage" highlighted
 4. The KM curve chart, loaded, showing two curves that visibly diverge
@@ -187,13 +187,13 @@ Rationale: accessibility and equity are judged criteria. A judge who cannot find
 | Time | Shot | What to show |
 |---|---|---|
 | 0:00–0:20 | Screen: city's own 311 portal showing on-time rate | "Boston publishes an on-time rate for 311 requests. That number has a problem." |
-| 0:20–0:45 | Screen: Wait Audit landing, tile 1 highlighted | "Seven thousand eight hundred and forty cases are currently open and already past the city's own deadline. They aren't in the on-time rate." |
+| 0:20–0:45 | Screen: 311 Wait landing, tile 1 highlighted | "Seven thousand eight hundred and forty cases are currently open and already past the city's own deadline. They aren't in the on-time rate." |
 | 0:45–1:15 | Screen: KM chart for Street Light Outage, cursor traces the gap between the two curves | "**The city's median for Street Light Outage is 13 days. The Kaplan–Meier corrected median is [X] days.** That gap is what right-censoring looks like — dropping the slow cases because they haven't finished yet." — **this is the emotional peak** |
 | 1:15–1:35 | Screen: closure-reason panel, Illegal Dumping row highlighted | "Even among cases the city marks Closed, 23% were Noted or Transitioned — not fixed. The on-time rate counts them." |
 | 1:35–1:55 | Screen: neighborhood table, South Boston Waterfront and Bay Village at top | "The slowest street-light neighborhoods are Bay Village and South Boston Waterfront — not where a simple story would put them. We show confidence intervals and suppress cells below n=30 so you can see what the data actually supports." |
 | 1:55–2:15 | Screen: honesty furniture strip, suppression row, confounder note | "Every number ships with its sample size, censoring count, and the confounders we cannot rule out." |
 | 2:15–2:35 | Screen: service picker switching from Street Light Outage to Pothole, charts update | "Every service type has its own curve. Pick the one you care about." |
-| 2:35–2:45 | Screen: full page scroll | "Wait Audit. Built with Kiro on Boston open data." |
+| 2:35–2:45 | Screen: full page scroll | "311 Wait. Built with Kiro on Boston open data." |
 
 **Emotional peak:** the KM vs naive gap number at 1:05, when the corrected median lands on screen and the viewer can see the two curves diverge. The single number to flash on screen is the gap in days — e.g., "**+[X] days**" — large, centered, held for three seconds.
 

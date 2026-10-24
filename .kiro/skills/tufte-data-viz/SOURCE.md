@@ -6,4 +6,4 @@
 - Copied: 2026-10-24, unmodified
 - Note: README, showcase images (`_docs/`), `docs/` and `examples/` left out; `SKILL.md` references only `rules/`.
 
-Installed for the Wait Audit UI after team approval. See `docs/UI-VISUAL-PLAN.md` §1.
+Installed for the 311 Wait UI after team approval. See `docs/UI-VISUAL-PLAN.md` §1.

@@ -6,4 +6,4 @@
 - Copied: 2026-10-24, unmodified
 - Note: Upstream NOTICE copied alongside: portions may be adapted from mapbox-agent-skills (MIT, Copyright (c) Mapbox, Inc.).
 
-Installed for the Wait Audit UI after team approval. See `docs/UI-VISUAL-PLAN.md` §1.
+Installed for the 311 Wait UI after team approval. See `docs/UI-VISUAL-PLAN.md` §1.

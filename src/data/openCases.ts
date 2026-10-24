@@ -36,7 +36,7 @@ export function loadOpenCases(): Promise<OpenCase[]> {
     WHERE open_date::timestamp >= '${COHORT_START}'
       AND case_status = 'In progress'
       AND latitude <> '' AND longitude <> ''`
-  openPromise = Promise.all([fetch(`${SQL_ENDPOINT}?sql=${encodeURIComponent(sql)}`), loadExtractCutoff()])
+  openPromise = Promise.all([fetch(`${SQL_ENDPOINT}?sql=${encodeURIComponent(sql)}`), loadExtractCutoff('boston')])
     .then(async ([res, cutoff]) => {
       if (!res.ok) throw new Error(`Boston 311 query failed: HTTP ${res.status}`)
       const body = await res.json()

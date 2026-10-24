@@ -5,4 +5,4 @@
 - Commit: `90606c8315ee09cafc303515c5f33024db6b9882`
 - Copied: 2026-10-24, unmodified
 
-Installed for the Wait Audit UI after team approval. See `docs/UI-VISUAL-PLAN.md` §1.
+Installed for the 311 Wait UI after team approval. See `docs/UI-VISUAL-PLAN.md` §1.

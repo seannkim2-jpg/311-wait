@@ -284,7 +284,7 @@ This is placed directly below the KM chart, before the confounder note.
 ## UI visual order (PRIMARY → SUPPORTING)
 
 ```
-Header: "Wait Audit" + query timestamp
+Header: "311 Wait" + query timestamp
 StatTiles: [56,797 in cohort] [23.9% Noted or Transitioned] [3.06× gap for SLO]
 Cohort scope note (REQ-23)
 ServicePicker

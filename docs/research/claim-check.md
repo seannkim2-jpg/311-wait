@@ -30,7 +30,7 @@ The data also contains closure reasons the dictionary does not list: `Resolved s
   Noted (no action required) or Transitioned (reassigned to another agency) rather than
   Resolved". A transitioned case may have been handled by the other agency.
 - **New, sourced:** the per-service CityScore on-time measures for potholes and streetlights
-  currently show no values in the published metric list, so Wait Audit gives a resident a
+  currently show no values in the published metric list, so 311 Wait gives a resident a
   number where that file has none. Say "in CityScore's published metric list", not "the city
   stopped measuring" — the dashboard may draw on another source.
 - **New, needs no inference:** 6,624 open cases are past the city's own target date
