@@ -38,15 +38,15 @@ export function Hero({ overview, audit, selected, loading, onSelect }: Props) {
               id="headline"
               className="font-display text-[clamp(2rem,4.6vw,3.4rem)] font-bold leading-[1.02] tracking-[-0.035em]"
             >
-              {oneIn(overview.closedUnresolved / overview.closed)} Boston 311 cases marked closed
-              were not resolved.
+              {oneIn(overview.closedUnresolved / overview.closed)} closed Boston 311 cases ended as
+              Noted or Transitioned rather than Resolved.
             </h1>
             <p className="mt-4 text-lg leading-relaxed text-ink-2">
               <span className="figure font-semibold text-ink">
                 {formatPct(overview.closedUnresolved / overview.closed)}
               </span>{' '}
-              of {formatInt(overview.closed)} closed cases since 1 July were filed as Noted or
-              Transitioned. Pick a service to see how long people actually wait.
+              of {formatInt(overview.closed)} closed cases since 1 July were filed as Noted (no action
+              required) or Transitioned (reassigned to another agency). Pick a service to see how long people actually wait.
             </p>
           </>
         ) : (
@@ -151,8 +151,8 @@ function Answer({ audit }: { audit: ServiceAudit }) {
       <div>
         <ul className="space-y-5" aria-label="Comparison">
           <CompareBar
-            label="What the city reports"
-            sub="closed cases only"
+            label="Closed cases only"
+            sub="median of the cases that have closed"
             value={`${formatNumber(city.value, waitDigits(city))} ${unitLabel(city)}`}
             share={audit.cityMedianHours / scaleMax}
             tone="city"
@@ -175,8 +175,8 @@ function Answer({ audit }: { audit: ServiceAudit }) {
         <p key={audit.service} className="animate-pop-in mt-6 inline-flex items-center gap-2 rounded-full bg-ink px-4 py-2 text-[0.9375rem] font-semibold text-white" style={{ animationDelay: '650ms' }}>
           {ratio !== null
             ? ratio >= 1.05
-              ? `${formatNumber(ratio, 1)}× longer than the city reports`
-              : 'About what the city reports'
+              ? `${formatNumber(ratio, 1)}× longer than closed cases alone suggest`
+              : 'About what closed cases alone suggest'
             : 'Most requests are still open'}
         </p>
       </div>
@@ -184,8 +184,8 @@ function Answer({ audit }: { audit: ServiceAudit }) {
       <dl className="col-span-full grid grid-cols-2 gap-x-8 gap-y-4 border-t border-rule pt-6 text-[0.9375rem] sm:grid-cols-4">
         <Stat term="Requests" value={formatInt(audit.n)} />
         <Stat term="Still open" value={formatInt(audit.stillOpen)} note="counted as censored" />
-        <Stat term="Actually resolved" value={`${resolvedIn100} in 100`} />
-        <Stat term="Closed, not resolved" value={`${notResolvedIn100} in 100`} note="Noted or Transitioned" />
+        <Stat term="Closed as resolved" value={`${resolvedIn100} in 100`} />
+        <Stat term="Noted or Transitioned" value={`${notResolvedIn100} in 100`} note="no action required, or sent to another agency" />
       </dl>
     </div>
   )

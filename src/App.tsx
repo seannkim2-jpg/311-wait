@@ -43,7 +43,7 @@ export default function App() {
         setAudit(a)
         setLoading(false)
         const real = a.kmMedianHours !== null ? `${formatWait(a.kmMedianHours)} until half are closed` : 'Fewer than half have ever closed'
-        setAnnouncement(`Now showing ${a.service}. ${real}; the city reports ${formatWait(a.cityMedianHours)}.`)
+        setAnnouncement(`Now showing ${a.service}. ${real}; closed cases alone say ${formatWait(a.cityMedianHours)}.`)
       })
       .catch((e: Error) => {
         if (!alive) return
@@ -123,8 +123,8 @@ export default function App() {
               lede={
                 <>
                   Of every 100 {inSentence(svc)} requests, how many are still not closed after a given
-                  number of days. The dashed line is the city&rsquo;s method, which only looks at cases
-                  that have already closed.
+                  number of days. The dashed line looks only at cases that have already
+                  closed.
                 </>
               }
             >
@@ -142,7 +142,7 @@ export default function App() {
             <Section
               id="outcomes"
               title="What happens to a report"
-              lede={`Closing a case is not the same as fixing it. This is every ${inSentence(svc)} request, split by how it ended: resolved, closed without being resolved (Noted or Transitioned), or still open.`}
+              lede={`Closing a case is not the same as resolving it. This is every ${inSentence(svc)} request, split by how it ended: closed as resolved, closed as Noted (no action required) or Transitioned (reassigned to another agency), or still open.`}
             >
               <OutcomeChart
                 audit={audit}
@@ -155,7 +155,7 @@ export default function App() {
               id="neighborhoods"
               tone="mist"
               title="On time, by neighborhood"
-              lede={`The share of closed ${inSentence(svc)} cases that met the city's own target, with a 95% range. It counts closed cases only, the same way the city does.`}
+              lede={`The share of closed ${inSentence(svc)} cases that met the city's own target, with a 95% range. It counts closed cases only.`}
             >
               <NeighborhoodTable rows={audit.neighborhoods} service={svc} />
             </Section>

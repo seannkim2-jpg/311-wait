@@ -5,6 +5,7 @@
  * exact reported spot never reaches the browser. No address fields are requested.
  */
 import { COHORT_START } from '../lib/boston311'
+import { loadExtractCutoff } from './audit'
 
 const RESOURCE = '254adca6-64ab-4c5c-9fc0-a6da622be185'
 const SQL_ENDPOINT = 'https://data.boston.gov/api/3/action/datastore_search_sql'
@@ -28,15 +29,15 @@ let openPromise: Promise<OpenCase[]> | null = null
 export function loadOpenCases(): Promise<OpenCase[]> {
   if (openPromise) return openPromise
   const sql = `
-    SELECT service_name, neighborhood, on_time,
+    SELECT service_name, neighborhood, target_close_date,
            ROUND(CAST(latitude AS numeric), 3) AS lat,
            ROUND(CAST(longitude AS numeric), 3) AS lon
     FROM "${RESOURCE}"
     WHERE open_date::timestamp >= '${COHORT_START}'
       AND case_status = 'In progress'
       AND latitude <> '' AND longitude <> ''`
-  openPromise = fetch(`${SQL_ENDPOINT}?sql=${encodeURIComponent(sql)}`)
-    .then(async (res) => {
+  openPromise = Promise.all([fetch(`${SQL_ENDPOINT}?sql=${encodeURIComponent(sql)}`), loadExtractCutoff()])
+    .then(async ([res, cutoff]) => {
       if (!res.ok) throw new Error(`Boston 311 query failed: HTTP ${res.status}`)
       const body = await res.json()
       if (!body?.success) throw new Error(body?.error?.message ?? 'Boston 311 query rejected')
@@ -44,7 +45,8 @@ export function loadOpenCases(): Promise<OpenCase[]> {
         .map((r) => ({
           service: r.service_name ?? '',
           neighborhood: r.neighborhood || null,
-          overdue: r.on_time === 'OVERDUE',
+          // Dates, not on_time: the flag lags for open cases (Street Light months past target reads ONTIME).
+          overdue: !!r.target_close_date && Date.parse(r.target_close_date.replace(' ', 'T').replace(/\+00(:00)?$/, 'Z')) < cutoff,
           lat: Number(r.lat),
           lon: Number(r.lon),
         }))

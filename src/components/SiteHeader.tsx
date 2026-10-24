@@ -61,7 +61,7 @@ export function SiteHeader({ queriedAt, compact, audit, services, selected, load
                   ? formatWait(audit.kmMedianHours)
                   : `${Math.floor(audit.maxDay)}+ days`}
               </span>{' '}
-              counting open cases · city reports {formatWait(audit.cityMedianHours)}
+              counting open cases · closed only {formatWait(audit.cityMedianHours)}
             </p>
           )}
         </div>

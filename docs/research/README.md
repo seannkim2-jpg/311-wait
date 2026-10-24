@@ -4,12 +4,16 @@ How the concept was chosen, checked, and corrected. Kept in the repo because the
 matter as much as the conclusions — two findings here were killed by fact-checking, and a judge
 reading `ANALYSIS.md` should be able to see that work rather than take it on trust.
 
-Kiro loads `.kiro/steering/data-facts.md` automatically in every session. That file is the
-authority on the numbers; everything here is the trail that produced it.
+The authority on the numbers is [`NUMBERS.md`](NUMBERS.md) / [`../../data/numbers.json`](../../data/numbers.json),
+regenerated from live data by `python3 scripts/refresh_numbers.py`. Kiro loads
+`.kiro/steering/data-facts.md` in every session, which points there. Everything else here is
+the dated trail that produced it.
 
 | File | What it is |
 | --- | --- |
-| [`311-corrected-numbers.md`](311-corrected-numbers.md) | **Authoritative.** Cohort-restricted figures after the extract defect was found. |
+| [`NUMBERS.md`](NUMBERS.md) | **Authoritative, generated.** Every figure for every service with 200+ cases. Do not edit by hand. |
+| [`claim-check.md`](claim-check.md) | What the city does and doesn't document about on-time rates, `on_time`, `Noted` and `Transitioned`, and the wording that follows. |
+| [`311-corrected-numbers.md`](311-corrected-numbers.md) | Cohort-restricted figures after the extract defect was found. Superseded by `NUMBERS.md`; its "not fixed" wording is withdrawn (see `claim-check.md`). |
 | [`311-first-pass-facts.md`](311-first-pass-facts.md) | First pass. **Headline figures superseded** — kept because it records the disproven income-gradient claim. |
 | [`statistical-plan.md`](statistical-plan.md) | The survival-analysis design and why censoring is the crux. |
 | [`kiro-redteam.md`](kiro-redteam.md) | Kiro as hostile judge and working statistician. Independently flagged the left-truncation problem and the competing-risks error. |

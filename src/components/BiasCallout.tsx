@@ -8,7 +8,7 @@ export function BiasCallout({ audit }: { audit: ServiceAudit }) {
 
   return (
     <aside
-      aria-label="How much the city's method understates the wait"
+      aria-label="How much a closed-cases-only median understates the wait"
       className="grid gap-6 rounded-3xl bg-ink px-6 py-8 text-white sm:grid-cols-[auto_1fr] sm:items-center sm:gap-10 sm:px-10 sm:py-10"
     >
       <p key={audit.service} className="animate-pop-in figure font-display text-[clamp(3.5rem,9vw,6rem)] font-extrabold leading-none tracking-[-0.05em]">

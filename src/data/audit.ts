@@ -6,6 +6,7 @@
 import {
   COHORT_START,
   fetchCohortTotals,
+  fetchExtractCutoff,
   fetchNeighborhoodOnTime,
   fetchServiceCases,
   fetchServices,
@@ -24,7 +25,7 @@ export interface CurvePoint {
   km: number
   /** 95% Greenwood band for `km`, as [low, high] */
   band: [number, number]
-  /** % of closed cases not yet closed at `day`, closed cases only (the city's method) */
+  /** % of closed cases not yet closed at `day`, closed cases only (the naive view) */
   city: number
   /** stacked outcome shares at `day`, in % (Aalen–Johansen) */
   resolved: number
@@ -49,7 +50,7 @@ export interface ServiceAudit {
   closed: number
   /** Kaplan–Meier median, in hours; null when fewer than half have ever closed */
   kmMedianHours: number | null
-  /** closed-cases-only median, in hours: what the city reports */
+  /** closed-cases-only median, in hours */
   cityMedianHours: number
   /** survival at the last event time: the floor of the curve */
   kmEnd: number
@@ -91,6 +92,19 @@ function timeGrid(maxDay: number, extras: number[], points = 260): number[] {
 
 const pct = (v: number) => Math.round(v * 10000) / 100
 
+let cutoffPromise: Promise<number> | null = null
+
+/** When the city cut the current extract. Open cases are timed to this, not to page load. */
+export function loadExtractCutoff(): Promise<number> {
+  if (!cutoffPromise) {
+    cutoffPromise = fetchExtractCutoff().catch((err) => {
+      cutoffPromise = null
+      throw err
+    })
+  }
+  return cutoffPromise
+}
+
 const auditCache = new Map<string, Promise<ServiceAudit>>()
 
 export function loadServiceAudit(service: string): Promise<ServiceAudit> {
@@ -105,12 +119,13 @@ export function loadServiceAudit(service: string): Promise<ServiceAudit> {
 }
 
 async function buildServiceAudit(service: string): Promise<ServiceAudit> {
-  const [rows, hoods] = await Promise.all([
+  const [rows, hoods, cutoff] = await Promise.all([
     fetchServiceCases(service),
     fetchNeighborhoodOnTime(service),
+    loadExtractCutoff(),
   ])
   const queriedAt = new Date()
-  const obs = toObservations(rows, queriedAt.getTime())
+  const obs = toObservations(rows, cutoff)
 
   const km = kaplanMeier(obs.map((o) => ({ hours: o.hours, event: o.cause !== 0 })))
   const closedHours = obs.filter((o) => o.cause !== 0).map((o) => o.hours)
@@ -170,7 +185,7 @@ let overviewPromise: Promise<Overview> | null = null
 
 export function loadOverview(): Promise<Overview> {
   if (!overviewPromise) {
-    overviewPromise = Promise.all([fetchCohortTotals(), fetchServices(200)])
+    overviewPromise = Promise.all([loadExtractCutoff().then(fetchCohortTotals), fetchServices(200)])
       .then(([totals, services]) => ({ ...totals, services, queriedAt: new Date() }))
       .catch((err) => {
         overviewPromise = null

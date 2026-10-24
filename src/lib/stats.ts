@@ -188,8 +188,8 @@ export function kaplanMeier(obs: KMObservation[]): KMResult {
 
 export type AJCause = 0 | 1 | 2;
 // 0 = censored (still open)
-// 1 = genuinely resolved
-// 2 = administratively closed (Noted, Transitioned)
+// 1 = closed any other way (Resolved, Resolved successfully, blank)
+// 2 = closed as Noted (no action required) or Transitioned (reassigned to another agency)
 
 export interface AJObservation {
   hours: number;
@@ -202,10 +202,10 @@ export interface AJCurvePoint {
 }
 
 export interface AJResult {
-  curve1: AJCurvePoint[]; // cause 1: genuine resolution
-  curve2: AJCurvePoint[]; // cause 2: admin closure
-  final1: number;          // F₁(∞): probability of genuine resolution
-  final2: number;          // F₂(∞): probability of admin closure
+  curve1: AJCurvePoint[]; // cause 1: closed as resolved
+  curve2: AJCurvePoint[]; // cause 2: closed as Noted or Transitioned
+  final1: number;          // F₁(∞): probability of a resolved closure
+  final2: number;          // F₂(∞): probability of Noted/Transitioned closure
   stillUnresolved: number; // 1 - final1 - final2 (must be within 1e-9 of open/n)
 }
 
@@ -313,8 +313,6 @@ export function wilson(successes: number, n: number, z = 1.96): WilsonInterval {
   if (successes < 0 || successes > n) throw new Error('wilson: successes must be in [0, n]');
 
   const z2 = z * z;
-  const p = successes / n;
-
   const center = (successes + z2 / 2) / (n + z2);
   const margin = (z / (n + z2)) * Math.sqrt(successes * (n - successes) / n + z2 / 4);
 

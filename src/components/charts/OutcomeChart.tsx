@@ -6,7 +6,7 @@ import { C, axisTick, dayTicks } from './axes'
 
 const SEGMENTS = [
   { key: 'resolved', label: 'Resolved', className: 'bg-data', text: 'text-data' },
-  { key: 'notResolved', label: 'Closed, not resolved', className: 'hatch-notfixed', text: 'text-notfixed' },
+  { key: 'notResolved', label: 'Noted or Transitioned', className: 'hatch-notfixed', text: 'text-notfixed' },
   { key: 'stillOpen', label: 'Still open', className: 'dots-open', text: 'text-overdue' },
 ] as const
 
@@ -22,7 +22,7 @@ function OutcomeTooltip({ active, payload }: TipProps) {
     <div className="rounded-xl border border-rule bg-white/95 px-3 py-2 text-sm shadow-[0_8px_24px_rgb(0_0_0/0.08)]">
       <p className="figure text-ink-3">After {formatNumber(p.day, p.day < 10 ? 1 : 0)} days</p>
       <p className="figure text-data">Resolved {formatNumber(p.resolved, 0)}%</p>
-      <p className="figure text-notfixed">Closed, not resolved {formatNumber(p.notResolved, 0)}%</p>
+      <p className="figure text-notfixed">Noted or Transitioned {formatNumber(p.notResolved, 0)}%</p>
       <p className="figure text-overdue">Still open {formatNumber(p.stillOpen, 0)}%</p>
     </div>
   )
@@ -41,7 +41,7 @@ export function OutcomeChart({ audit, citywideShare, citywideClosed }: {
   const { ref, seen } = useInViewOnce<HTMLDivElement>()
   const o = audit.outcomes
   const shares = { resolved: o.resolved, notResolved: o.notResolved, stillOpen: o.stillOpen }
-  const summary = `${audit.service}, after up to ${Math.floor(audit.maxDay)} days: ${formatNumber(o.resolved * 100, 1)}% resolved, ${formatNumber(o.notResolved * 100, 1)}% closed without being resolved, ${formatNumber(o.stillOpen * 100, 1)}% still open.`
+  const summary = `${audit.service}, after up to ${Math.floor(audit.maxDay)} days: ${formatNumber(o.resolved * 100, 1)}% resolved, ${formatNumber(o.notResolved * 100, 1)}% closed as Noted or Transitioned, ${formatNumber(o.stillOpen * 100, 1)}% still open.`
 
   return (
     <figure className="m-0" ref={ref}>
@@ -105,8 +105,8 @@ export function OutcomeChart({ audit, citywideShare, citywideClosed }: {
       <figcaption className="mt-4 space-y-2 text-[0.9375rem] leading-relaxed text-ink-2">
         {citywideShare !== null && (
           <p className="font-semibold text-ink">
-            {formatNumber(citywideShare * 100, 1)}% of closed cases were Noted or Transitioned —
-            not resolved.{' '}
+            {formatNumber(citywideShare * 100, 1)}% of closed cases were closed as Noted (no action
+            required) or Transitioned (reassigned to another agency) rather than Resolved.{' '}
             <span className="figure font-normal text-ink-3">
               All services, {citywideClosed !== null ? formatInt(citywideClosed) : '—'} closed cases.
             </span>
@@ -115,7 +115,7 @@ export function OutcomeChart({ audit, citywideShare, citywideClosed }: {
         <p className="figure text-ink-3">
           {audit.service}: n = {formatInt(audit.n)} requests · {formatInt(audit.stillOpen)} still
           open (censored). Estimated with Aalen–Johansen cumulative incidence, which treats Noted and
-          Transitioned as their own outcome rather than as cases that will be fixed later.
+          Transitioned as their own outcome rather than as cases that will be resolved later.
         </p>
       </figcaption>
     </figure>

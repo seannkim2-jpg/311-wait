@@ -26,7 +26,7 @@ function SurvivalTooltip({ active, payload }: TipProps) {
     <div className="rounded-xl border border-rule bg-white/95 px-3 py-2 text-sm shadow-[0_8px_24px_rgb(0_0_0/0.08)] backdrop-blur">
       <p className="figure text-ink-3">After {formatNumber(p.day, p.day < 10 ? 1 : 0)} days</p>
       <p className="figure font-semibold text-data">{formatNumber(p.km, 0)}% still waiting</p>
-      <p className="figure text-city-text">City&rsquo;s method: {formatNumber(p.city, 0)}%</p>
+      <p className="figure text-city-text">Closed cases only: {formatNumber(p.city, 0)}%</p>
     </div>
   )
 }
@@ -44,8 +44,8 @@ export function SurvivalChart({ audit }: { audit: ServiceAudit }) {
 
   const finding =
     kmDay !== null
-      ? `Counting open cases, half of ${audit.service} requests close within ${formatWait(audit.kmMedianHours!)}. Looking only at closed cases, as the city does, gives ${formatWait(audit.cityMedianHours)}.`
-      : `Counting open cases, ${formatNumber(audit.kmEnd * 100, 0)}% of ${audit.service} requests are still not closed after ${Math.floor(audit.maxDay)} days, so the curve never reaches half. Looking only at closed cases, as the city does, gives ${formatWait(audit.cityMedianHours)}.`
+      ? `Counting open cases, half of ${audit.service} requests close within ${formatWait(audit.kmMedianHours!)}. Looking only at closed cases gives ${formatWait(audit.cityMedianHours)}.`
+      : `Counting open cases, ${formatNumber(audit.kmEnd * 100, 0)}% of ${audit.service} requests are still not closed after ${Math.floor(audit.maxDay)} days, so the curve never reaches half. Looking only at closed cases gives ${formatWait(audit.cityMedianHours)}.`
 
   return (
     <figure className="m-0">
@@ -119,7 +119,7 @@ export function SurvivalChart({ audit }: { audit: ServiceAudit }) {
               {last && (
                 <>
                   <ReferenceDot x={last.day} y={last.km} r={0} label={{ value: 'Counting open cases', position: 'right', fill: C.data, fontSize: 13, fontWeight: 600 }} />
-                  <ReferenceDot x={last.day} y={last.city} r={0} label={{ value: 'What the city reports', position: 'right', fill: C.ink2, fontSize: 13 }} />
+                  <ReferenceDot x={last.day} y={last.city} r={0} label={{ value: 'Closed cases only', position: 'right', fill: C.ink2, fontSize: 13 }} />
                 </>
               )}
             </ComposedChart>

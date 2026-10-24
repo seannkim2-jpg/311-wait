@@ -18,6 +18,16 @@ const golden = read('golden.json')
 const cases = read('cohortCases.json')
 
 type Row = { case_status: string; closure_reason: string | null; open_date: string; close_date: string | null }
+type GoldenService = {
+  n: number
+  censored: number
+  events: number
+  naiveMedianHours: number
+  kmMedianHours: number | null
+  cifResolved: number
+  cifAdminClosed: number
+  stillUnresolved: number
+}
 
 const QUERY_TIME = Date.parse('2026-10-24T16:00:00Z')
 const COHORT_START = Date.parse('2026-07-01T00:00:00Z')
@@ -46,7 +56,7 @@ function observations(rows: Row[]) {
 }
 
 describe('TypeScript matches the Python reference on the real cohort', () => {
-  for (const [service, want] of Object.entries(golden.services as Record<string, any>)) {
+  for (const [service, want] of Object.entries(golden.services as Record<string, GoldenService>)) {
     const rows = (cases as Record<string, Row[]>)[service]
     if (!rows) continue
 
