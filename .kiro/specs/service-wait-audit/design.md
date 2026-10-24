@@ -35,7 +35,7 @@ service times.
 July through October 2026 are internally consistent at 13,000–15,600 cases/month, so
 the window looks complete. The cohort has **n = 56,797** cases and a maximum observable
 duration of approximately 115 days (July 1 → October 24). The "longest wait" figures
-from earlier analyses (122 d, 361 d, 449 d) came from the contaminated pre-July tail and
+from earlier analyses came from the contaminated pre-July tail and
 are artifacts. **Do not use them.**
 
 ---
@@ -152,9 +152,9 @@ interface Case {
   closeDate: Date | null;
   targetCloseDate: Date | null;
   durationHours: number | null;   // null if still open
-  waitHours: number;              // durationHours OR (now - openDate) in hours
+  waitHours: number;              // durationHours OR (extractCutoff - openDate); see fetchExtractCutoff()
   // Cause encoding for AJ:
-  // 0 = still open (censored), 1 = genuinely resolved, 2 = Noted/Transitioned
+  // 0 = still open (censored), 1 = closed as resolved, 2 = Noted/Transitioned
   cause: 0 | 1 | 2;
 }
 ```
@@ -206,15 +206,15 @@ The median is null for Sidewalk Repair (S ends at 0.683), which is itself the fi
 
 ### `aalenJohansen(obs: {hours: number, cause: 0|1|2}[])`
 
-Cause encoding: `0` = censored/still open, `1` = genuinely resolved,
-`2` = administratively closed (Noted, Transitioned).
+Cause encoding: `0` = censored/still open, `1` = closed as resolved,
+`2` = closed as Noted (no action required) or Transitioned (reassigned to another agency).
 
 Returns:
 ```ts
 {
-  curve1: { t: number; cif: number }[];  // cause 1: genuine resolution
+  curve1: { t: number; cif: number }[];  // cause 1: resolved closure
   curve2: { t: number; cif: number }[];  // cause 2: admin closure
-  final1: number;          // F₁(∞) — probability of genuine resolution
+  final1: number;          // F₁(∞) — probability of resolved closure
   final2: number;          // F₂(∞) — probability of admin closure
   stillUnresolved: number; // 1 - final1 - final2, must be within 1e-9 of (open cases / n)
 }
@@ -309,7 +309,7 @@ Three tiles:
 Recharts horizontal stacked `BarChart`. One bar = all cohort cases for selected service.
 Segments: Resolved (green), Resolved successfully (green), Noted (amber), Transitioned (red), null/Other (slate).
 
-Below chart: AJ CIF line chart — two curves, F₁(t) genuine resolution, F₂(t) admin closure.
+Below chart: AJ CIF line chart — two curves, F₁(t) resolved closure, F₂(t) admin closure.
 
 Annotation: "23.9% of closed cases (Noted + Transitioned) were not resolved."
 This panel appears BEFORE the KM chart.

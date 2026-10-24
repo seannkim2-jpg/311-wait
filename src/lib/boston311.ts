@@ -19,10 +19,13 @@ const SQL_ENDPOINT = 'https://data.boston.gov/api/3/action/datastore_search_sql'
  */
 export const COHORT_START = '2026-07-01'
 
-/** Closure reasons that mean the case was closed without being fixed. */
+/**
+ * Closure reasons that are not a resolution. Per the 311 data dictionary, Noted means no action
+ * is required and Transitioned means reassigned to another agency.
+ */
 export const UNRESOLVED_REASONS = ['Noted', 'Transitioned'] as const
 
-export type Cause = 0 | 1 | 2 // 0 censored, 1 resolved, 2 administratively closed
+export type Cause = 0 | 1 | 2 // 0 censored, 1 closed any other way, 2 closed as Noted/Transitioned
 
 export interface CaseRow {
   case_status: string
@@ -135,6 +138,18 @@ export async function fetchNeighborhoodOnTime(serviceName: string) {
   }))
 }
 
+/**
+ * When the city cut the current extract: the latest open or close timestamp in the data.
+ * Open cases must be censored here, not at Date.now() — the extract is refreshed about once a
+ * day, so "now" would pad every open case's wait by however stale the extract is.
+ */
+export async function fetchExtractCutoff(): Promise<number> {
+  const [r] = await runSql<{ mo: string; mc: string }>(
+    `SELECT MAX(open_date) AS mo, MAX(close_date) AS mc FROM "${RESOURCE}"`,
+  )
+  return Math.max(parseTimestamp(r.mo), parseTimestamp(r.mc))
+}
+
 function parseTimestamp(ts: string): number {
   // CKAN returns "2026-07-14 10:56:30.994145+00"; make it ISO-8601 so Date can read it.
   const iso = ts.trim().replace(' ', 'T').replace(/\+00$/, 'Z')
@@ -147,10 +162,11 @@ function parseTimestamp(ts: string): number {
  * Turn raw rows into survival observations.
  *
  * Closed cases are events, dated by `close_date`. Cases still in progress are censored at
- * `queryTime`. A closure reason of Noted or Transitioned is a *competing event* (cause 2),
- * not censoring — treating it as censored would assume the case would eventually be fixed.
+ * `censorAt`, which should come from fetchExtractCutoff(). A closure reason of Noted or
+ * Transitioned is a *competing event* (cause 2), not censoring — treating it as censored would
+ * assume the case would eventually be resolved.
  */
-export function toObservations(rows: CaseRow[], queryTime = Date.now()): Observation[] {
+export function toObservations(rows: CaseRow[], censorAt: number): Observation[] {
   const out: Observation[] = []
   const unresolved = new Set<string>(UNRESOLVED_REASONS)
   for (const row of rows) {
@@ -160,7 +176,7 @@ export function toObservations(rows: CaseRow[], queryTime = Date.now()): Observa
       if (hours < 0) continue // clock-skew rows; dropping is safer than clamping to 0
       out.push({ hours, cause: unresolved.has(row.closure_reason ?? '') ? 2 : 1 })
     } else if (row.case_status === 'In progress') {
-      const hours = (queryTime - opened) / 3_600_000
+      const hours = (censorAt - opened) / 3_600_000
       if (hours >= 0) out.push({ hours, cause: 0 })
     }
   }

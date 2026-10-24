@@ -1,9 +1,10 @@
 # Requirements: service-wait-audit
 
-Boston 311 wait-time audit. Statistically honest comparison of the city's published
-on-time rate and median closure time against Kaplan–Meier and Aalen-Johansen
-estimates that account for the 7,876 cases still open and the 11,701 closed without
-genuine resolution.
+Boston 311 wait-time audit. Statistically honest comparison of the median among closed
+cases against Kaplan–Meier and Aalen-Johansen estimates that include the 7,876 cases still
+open and separate the 11,701 closed as Noted (no action required) or Transitioned
+(reassigned to another agency). Do not describe the closed-only median as the city's
+method: see docs/research/claim-check.md. Current figures: data/numbers.json.
 
 Source: `data.boston.gov` CKAN resource `254adca6-64ab-4c5c-9fc0-a6da622be185`.
 No API key. CORS-open.
@@ -109,7 +110,7 @@ the count and percentage of closed cases by `closure_reason` value. Key cohort f
 - Closed: **48,903** (86.1%)
 - Still open: **7,876** (13.9%)
 - Still open AND past city target: **6,240** (10.99% of total)
-- Closed as `Noted` or `Transitioned` (not resolved): **11,701 of 48,903 = 23.9%**
+- Closed as `Noted` or `Transitioned` (not a Resolved closure): **11,701 of 48,903 = 23.9%**
 
 "Noted" and "Transitioned" segments SHALL use a visually distinct color from
 "Resolved" and "Resolved successfully". An annotation SHALL read:
@@ -227,8 +228,8 @@ would. The correct estimator is the Aalen-Johansen cumulative incidence function
 
 The AJ estimator SHALL:
 - Accept observations with `cause: 0 | 1 | 2` (0 = censored/still open,
-  1 = genuinely resolved, 2 = administratively closed / Noted+Transitioned).
-- Compute per-cause CIF curves: F₁(t) for genuine resolution, F₂(t) for admin closure.
+  1 = closed as resolved, 2 = closed as Noted or Transitioned).
+- Compute per-cause CIF curves: F₁(t) for resolved closure, F₂(t) for Noted/Transitioned.
 - Return the final incidence for each cause plus the share still unresolved
   (1 − F₁(∞) − F₂(∞)).
 - Guarantee: F₁(∞) + F₂(∞) + still_unresolved = 1.0 within 1e-9.

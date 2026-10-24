@@ -5,7 +5,8 @@ Hackachusetts 2026 · Civic Action track · submission 8:00 PM Eastern, 24 Octob
 ## What we are building
 
 **Wait Audit** — a one-page, browser-only statistical audit of Boston 311 that shows how far
-the city's own way of measuring service waits understates what residents experience. No login,
+a median taken over closed cases only understates what residents waiting on open cases
+experience. No login,
 no backend, no API key. It queries the city's live open-data endpoint from the browser and runs
 the statistics on the page.
 

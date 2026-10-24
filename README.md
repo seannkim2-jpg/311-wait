@@ -6,24 +6,29 @@
 
 ## What it does
 
-Boston publishes an on-time rate for 311 service requests, but it is computed only over
-**closed** cases — so the 7,876 requests still sitting open, which are disproportionately the
-slow ones, are left out of the city's own measure of its performance.
+When you file a 311 request in Boston, how long will you wait? Taking the median of closed
+cases gives a quick answer, but it leaves out the 7,876 requests still open, and those are
+disproportionately the slow ones.
 
 Wait Audit puts them back in. It queries Boston's live open-data endpoint from the browser with
 no API key and no backend, then applies survival analysis: Kaplan–Meier for time-to-closure
-with censored cases included, and Aalen–Johansen competing-risks incidence to separate requests
-that were genuinely resolved from those merely closed.
+with open cases included, and Aalen–Johansen competing-risks incidence to separate cases closed
+as resolved from cases closed as `Noted` ("no action is required") or `Transitioned`
+("reassigned to another agency"), in the city data dictionary's words.
 
-The gap is large and specific. Street light outages show a 4.7-day median by the city's method
-and **14.7 days** once open cases are counted. Sidewalk repairs have **no median at all**,
-because 70% have never closed — only 17.7% were actually resolved. Across the cohort, **23.9%**
-of "closed" cases were filed as `Noted` or `Transitioned` rather than fixed.
+The gap is large and specific. For street light outages the median among closed cases is
+4.7 days; the estimate including open cases is **14.5 days**, right at the city's 14-day
+target. Sidewalk repairs have a one-day target, yet 70% are still open, so **no median exists
+at all**: fewer than half have ever closed. Across the cohort, 6,240 open cases are already past
+their target date, and **23.9%** of closed cases were closed as `Noted` or `Transitioned` rather
+than `Resolved`.
 
 It makes no causal claim about why. It audits the measurement, shows its sample sizes,
 censoring counts and confidence intervals, and says where the data cannot answer.
 
 - [`docs/ANALYSIS.md`](docs/ANALYSIS.md) — method, results, limitations
+- [`docs/research/NUMBERS.md`](docs/research/NUMBERS.md) / [`data/numbers.json`](data/numbers.json) — every current figure, generated
+- [`docs/research/claim-check.md`](docs/research/claim-check.md) — what the city does and doesn't document
 - [`docs/ROADMAP.md`](docs/ROADMAP.md) — status and what to build on
 - [`docs/UI-DESIGN.md`](docs/UI-DESIGN.md) — interface brief
 - [`docs/PLAN.md`](docs/PLAN.md) — schedule and agent boundaries
@@ -48,9 +53,10 @@ verified figures and the claims the data cannot support. Start from
 The estimators were implemented three times independently and agree to six decimal places.
 
 ```bash
-npm install && npm test                            # 17 tests, incl. 12 fast-check properties
-./scripts/fetch_cohort_cases.sh                    # rebuild fixtures from live data, no key
 python3 -m pip install lifelines
+python3 scripts/refresh_numbers.py                 # re-pull every figure, self-check, lint the docs' claims
+npm install && npm test                            # 18 tests, incl. 12 fast-check properties
+./scripts/fetch_cohort_cases.sh                    # rebuild fixtures from live data, no key
 python3 scripts/validate_against_lifelines.py      # third opinion vs the standard library
 ```
 

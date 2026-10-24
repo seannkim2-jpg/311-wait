@@ -16,7 +16,7 @@ A **resident** wants one plain answer: *if I report this, how long until it is a
 They do not know what Kaplan–Meier is and should not have to.
 
 A **judge or journalist** wants the audit: the estimator, the sample size, the censoring, the
-assumptions, and the reason the city's own number differs.
+assumptions, and the reason a closed-cases-only median differs.
 
 Serving one by sacrificing the other fails. The answer is **progressive disclosure** — three
 stacked layers, each complete on its own, each inviting the next.
@@ -28,14 +28,15 @@ A resident must get a usable answer without scrolling, clicking a legend, or rea
 Target: a sentence a person would say out loud.
 
 > **Sidewalk repairs in Boston**
-> Half are still open after 115 days. Only **18 in 100** actually get fixed.
-> The city's published figure for this service is **under a day**.
+> The city's target is **one day**. Seven in ten are still open, so half are still waiting
+> after 115 days. Counting only the cases that closed makes it look like **under a day**.
 
 Rules for this layer:
 - One headline number, very large. One comparison number, clearly subordinate.
 - Plain words only. No "median", no "censored", no "estimator", no Greek.
-- The gap between what the city reports and what the data shows must be visible without
-  interpretation — put the two numbers side by side and label which is which.
+- The gap between the closed-cases-only median and the estimate including open cases must
+  be visible without interpretation — put the two numbers side by side and label which is
+  which. Never label the first one as the city's figure; the city publishes no 311 median.
 - A service picker driven by the live data, not a hardcoded list. This answers the
   cherry-picking objection and doubles as the main interaction.
 
@@ -49,7 +50,8 @@ Recharts draws this as `<Line type="stepAfter">` plus an `<Area>` for the band �
 curve is a step function and must never be rendered as a smooth spline.
 
 **The competing-risks bar.** Three mutually exclusive outcomes from `aalenJohansen`:
-genuinely resolved, closed without being fixed, still open. One horizontal stacked bar, the
+closed as resolved, closed as Noted (no action required) or Transitioned (reassigned to
+another agency), still open. Use the data dictionary's words in the labels. One horizontal stacked bar, the
 three segments directly labelled with percentages. This is the finding that needs no
 statistics to understand, so it should read instantly.
 

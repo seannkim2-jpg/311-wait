@@ -53,7 +53,7 @@ Median = first t where S(t) ≤ 0.5, or null (Sidewalk Repair case).
 Returns:
 ```ts
 {
-  curve1: {t: number, cif: number}[];   // genuine resolution CIF
+  curve1: {t: number, cif: number}[];   // resolved closure CIF
   curve2: {t: number, cif: number}[];   // admin closure CIF
   final1: number;          // F₁(∞)
   final2: number;          // F₂(∞)
@@ -181,7 +181,7 @@ Loading: grey skeleton `animate-pulse` bars.
 ### T-32 `ClosureReasonPanel.tsx` (PRIMARY — render BEFORE KMChart)
 
 - Stacked horizontal `BarChart`: Resolved=green, Noted=amber, Transitioned=red, other=slate
-- AJ CIF line chart: F₁(t) genuine resolution, F₂(t) admin closure
+- AJ CIF line chart: F₁(t) resolved closure, F₂(t) admin closure
 - Annotation: "23.9% of closed cases (Noted + Transitioned) were not resolved."
 - Cohort scope note (REQ-23) above this panel
 
