@@ -59,7 +59,7 @@ The estimators were implemented three times independently and agree to six decim
 ```bash
 python3 -m pip install lifelines
 python3 scripts/refresh_numbers.py                 # re-pull every figure, self-check, lint the docs' claims
-npm ci && npm test                                 # includes 12 fast-check properties
+npm ci && npm test                                 # includes fast-check properties
 ./scripts/fetch_cohort_cases.sh                    # rebuild fixtures from live data, no key
 python3 scripts/validate_against_lifelines.py      # third opinion vs the standard library
 ```
@@ -92,6 +92,22 @@ npm run build && npm run preview   # production build at http://localhost:4173
 
 `./scripts/build_map_assets.sh` rebuilds `public/map/` from the city's boundary file and a
 Protomaps build of OpenStreetMap (it needs the free `pmtiles` CLI).
+
+### Testing the case lookup
+
+No login is needed. Type any Boston 311 case number into **Where does my case stand?**. These
+cover each situation (status as of the 2026-10-24 extract; the city updates daily):
+
+| Case | Shows |
+| --- | --- |
+| `BCS-00327633` | Street Light Outage, open past target: historical 14-day chance and a "please give a completion date" summary |
+| `BCS-00352721` | Street Light Outage, open before its target date |
+| `BCS-00253943` | Closed as Transitioned: the summary asks which agency now has it |
+| `BCS-00241221` | Open about 114 days: the page says this is beyond what the data covers |
+| `BCS-00225619` | Opened before July 2026: outside the period the page covers |
+| `BCS-0025394X` | Malformed: rejected before anything is sent |
+
+Recheck every figure behind it: `python3 scripts/check_make_the_case.py` (standard library only).
 
 ## Built with Kiro
 

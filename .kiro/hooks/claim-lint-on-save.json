@@ -1,0 +1,16 @@
+{
+  "version": "v1",
+  "hooks": [
+    {
+      "name": "claim-lint-on-save",
+      "description": "Keep every saved source file and doc inside the claim rules in .kiro/steering/claims.md",
+      "trigger": "PostFileSave",
+      "matcher": "(^|/)(src|docs)/",
+      "action": {
+        "type": "agent",
+        "prompt": "A file under src/ or docs/ was just saved. Run `python3 scripts/refresh_numbers.py --lint-only`. If it reports any problem, fix the wording at each reported file:line so it follows .kiro/steering/claims.md (for example 'median among closed cases' instead of a phrase calling it the city's figure, and 'closed as Noted or Transitioned' instead of saying cases were unfixed), then rerun the lint until it reports 0 problems. Do not weaken or delete the lint patterns in scripts/refresh_numbers.py to make it pass."
+      },
+      "enabled": true
+    }
+  ]
+}

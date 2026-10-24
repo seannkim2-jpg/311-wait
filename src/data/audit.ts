@@ -14,7 +14,7 @@ import {
   type CohortTotals,
   type ServiceCount,
 } from '../lib/boston311'
-import { aalenJohansen, kaplanMeier, naiveMedian, wilson } from '../lib/stats'
+import { aalenJohansen, kaplanMeier, naiveMedian, wilson, type KMResult } from '../lib/stats'
 
 const HOURS_PER_DAY = 24
 
@@ -58,6 +58,12 @@ export interface ServiceAudit {
   curve: CurvePoint[]
   outcomes: { resolved: number; notResolved: number; stillOpen: number }
   neighborhoods: NeighborhoodRow[]
+  /** The Kaplan–Meier result the survival chart is drawn from (used by the case lookup). */
+  km: KMResult
+  /** Every observed duration, in hours, ascending: counts how many cases were seen past an age. */
+  sortedHours: number[]
+  /** Extract cutoff (ms) the open cases were censored at. */
+  cutoff: number
 }
 
 export interface Overview extends CohortTotals {
@@ -178,6 +184,9 @@ async function buildServiceAudit(service: string): Promise<ServiceAudit> {
     curve,
     outcomes: { resolved: aj.final1, notResolved: aj.final2, stillOpen: aj.stillUnresolved },
     neighborhoods,
+    km,
+    sortedHours: obs.map((o) => o.hours).sort((a, b) => a - b),
+    cutoff,
   }
 }
 

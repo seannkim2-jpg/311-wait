@@ -13,6 +13,8 @@
     @apply bg-white text-ink antialiased;
     font-family: theme('fontFamily.sans');
     scroll-behavior: smooth;
+    /* Keep anchors and focused fields clear of the sticky 64px header. */
+    scroll-padding-top: 5rem;
     text-rendering: optimizeLegibility;
   }
 
