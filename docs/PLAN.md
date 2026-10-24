@@ -72,13 +72,13 @@ floor** — ship those or ship nothing.
 
 One scrolling page.
 
-Above the fold: query timestamp · three stat tiles (6,240 past deadline · 23.9% closed without
-resolution · the understatement in days) · service picker driven by the data, not a hardcoded
+Above the fold: extract timestamp · three stat tiles (6,624 open past target · 23.9% closed as
+Noted or Transitioned · the gap in days) · service picker driven by the data, not a hardcoded
 list · Kaplan–Meier curve against the naive median with a confidence band.
 
-Below: competing-risks bar (resolved / closed-not-fixed / still open) · neighborhood table with
+Below: competing-risks bar (resolved / Noted or Transitioned / still open) · neighborhood table with
 Wilson intervals and suppressed small cells · methodology and caveats in the main flow ·
 optional Cambridge panel, clearly labelled as a proxy.
 
-Default service is Street Light Outage, for the clean 3.09x number. Sidewalk Repair is featured
+Default service is Street Light Outage, for the clean 3.06x gap against a 14-day target. Sidewalk Repair is featured
 separately as the case where the metric breaks entirely.

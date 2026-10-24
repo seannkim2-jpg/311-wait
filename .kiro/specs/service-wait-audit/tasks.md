@@ -88,18 +88,18 @@ Golden values from independent Python implementation on real cohort (±0.005 tol
 {
   "streetLightOutage": {
     "n": 1413, "censored": 536,
-    "naiveMedianDays": 4.75, "kmMedianDays": 14.67, "ratio": 3.09,
-    "aj": { "resolved": 0.704, "adminClosed": 0.070, "unresolved": 0.226 }
+    "naiveMedianDays": 4.74, "kmMedianDays": 14.50, "ratio": 3.06,
+    "aj": { "resolved": 0.706, "adminClosed": 0.070, "unresolved": 0.224 }
   },
   "sidewalkRepair": {
     "n": 2561, "censored": 1798,
     "naiveMedianDays": 0.86, "kmMedianDays": null, "sFinal": 0.683,
-    "aj": { "resolved": 0.177, "adminClosed": 0.140, "unresolved": 0.683 }
+    "aj": { "resolved": 0.178, "adminClosed": 0.140, "unresolved": 0.682 }
   },
   "pothole": {
     "n": 2214, "censored": 485,
-    "naiveMedianDays": 1.83, "kmMedianDays": 3.09, "ratio": 1.69,
-    "aj": { "resolved": 0.644, "adminClosed": 0.160, "unresolved": 0.196 }
+    "naiveMedianDays": 1.83, "kmMedianDays": 3.08, "ratio": 1.69,
+    "aj": { "resolved": 0.644, "adminClosed": 0.160, "unresolved": 0.195 }
   },
   "litterDebris": {
     "n": 9839, "censored": 403,
@@ -168,8 +168,8 @@ export const SERVICES: string[]
 
 Tiles:
 1. "Cases in cohort" — 56,797 (sub: "opened 2026-07-01 → 2026-10-24")
-2. "Closed without resolution" — 23.9% (sub: "11,701 Noted or Transitioned")
-3. "Wait understatement" — updates with service picker (SLO default: 3.09×)
+2. "Closed as Noted or Transitioned" — 23.9% (sub: "11,701 of 48,903 closed cases")
+3. "Gap vs closed-only median" — updates with service picker (SLO default: 3.06×)
 
 Loading: grey skeleton `animate-pulse` bars.
 
@@ -182,7 +182,7 @@ Loading: grey skeleton `animate-pulse` bars.
 
 - Stacked horizontal `BarChart`: Resolved=green, Noted=amber, Transitioned=red, other=slate
 - AJ CIF line chart: F₁(t) resolved closure, F₂(t) admin closure
-- Annotation: "23.9% of closed cases (Noted + Transitioned) were not resolved."
+- Annotation: "23.9% of closed cases were closed as Noted or Transitioned rather than Resolved."
 - Cohort scope note (REQ-23) above this panel
 
 ### T-33 `KMChart.tsx` (SUPPORTING — render AFTER ClosureReasonPanel)
@@ -222,7 +222,7 @@ Default sort: KM median descending. Suppressed cells: `—` with tooltip.
 1. Suppression line
 2. Confounder note (service-type templated)
 3. Query timestamp
-4. "6,240 cases currently past their deadline" — labeled as prevalence count, no denominator
+4. "6,624 open cases past their target date" (from data/numbers.json) — labeled as prevalence count, no denominator
 
 ---
 
@@ -273,9 +273,9 @@ Log Kiro usage at each phase. Note: spec generation, stats PBT, AJ red-team resp
 ## Phase 9 — Video (19:00–19:45)
 
 Shot list:
-1. 0:00–0:20 City portal showing on-time rate
-2. 0:20–0:40 Closure-reason panel: 23.9% not resolved (the no-inference finding)
-3. 0:40–1:15 KM chart — gap number on screen, Street Light Outage 3.09×
+1. 0:00–0:20 A resident's question: "I reported a broken sidewalk. How long will it take?"
+2. 0:20–0:40 Closure-reason panel: 23.9% closed as Noted or Transitioned (the no-inference finding)
+3. 0:40–1:15 KM chart — gap number on screen, Street Light Outage 3.06×
 4. 1:15–1:35 Sidewalk Repair — "no honest median"
 5. 1:35–1:55 Neighborhood table
 6. 1:55–2:15 Honesty furniture + caveat

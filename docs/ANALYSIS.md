@@ -89,14 +89,20 @@ Cohort of 56,797 cases opened on or after 2026-07-01:
 | --- | --- |
 | Closed | 48,903 |
 | Still open | 7,876 |
-| Still open and past the city's own target | 6,240 |
+| Still open and past the city's own target date | **6,624** |
 | Closed as `Noted` or `Transitioned` | 11,701 of 48,903 — **23.9%** |
-| On time, among closed cases | 86.5% |
-| On time, counting open cases already past target as late | 76.7% |
+| On time (closed by target date), among closed cases | 86.5% |
+| On time, counting open cases already past target as late | 76.2% |
 
-The `on_time` column is filled for open cases as well as closed ones, so the second on-time
-figure needs no inference: 6,240 open cases are already marked `OVERDUE`. Open cases not yet
-due are left out of both figures because their outcome is undecided.
+"Past target" is computed from `target_close_date` against the extract cutoff, not from the
+city's `on_time` flag. For closed cases the two agree (15 disagreements in 48,903). For open
+cases the flag lags: 384 open cases already past their target still read ONTIME, 324 of them
+Street Light Outage. Open cases not yet due are left out of both on-time figures because their
+outcome is undecided.
+
+Per service the second figure moves a lot: Street Light Outage is 75.1% on time among closed
+cases and 53.5% once open cases past target count as late; Pothole is 38.1% and 29.8%, against
+CityScore's stated aim of 80% within one business day.
 
 ### Censoring correction
 
@@ -137,11 +143,10 @@ censoring is present rather than inflating everything.
   are longer than reported. There is no test for this in the data.
 - **No causal claims.** The data cannot say why one service or area is slower. Case density,
   street-light ownership (city, utility or private) and contractor routing are all confounded.
-- **No income gradient.** An earlier pass proposed an equity-gap framing. Checking it found the
-  slowest street-light medians in South Boston Waterfront (54 d), Bay Village (52 d), North End
-  (31 d) and Beacon Hill (28 d) — several of the city's wealthiest areas. The gradient is not
-  in this data and is not claimed.
-- **Prevalence, not a rate.** "6,240 cases are currently past their deadline" is a
+- **No neighborhood or income claims.** An earlier pass proposed an equity-gap framing built
+  on an invented statistic. It was checked, did not hold up, and was dropped. Neighborhood
+  comparisons in this project are descriptive only, with small cells suppressed.
+- **Prevalence, not a rate.** "6,624 open cases are past their target date" is a
   cross-sectional count over cases of differing ages. It has no denominator.
 - **Horizon.** The cohort cannot speak to waits beyond about 115 days.
 

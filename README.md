@@ -19,7 +19,7 @@ as resolved from cases closed as `Noted` ("no action is required") or `Transitio
 The gap is large and specific. For street light outages the median among closed cases is
 4.7 days; the estimate including open cases is **14.5 days**, right at the city's 14-day
 target. Sidewalk repairs have a one-day target, yet 70% are still open, so **no median exists
-at all**: fewer than half have ever closed. Across the cohort, 6,240 open cases are already past
+at all**: fewer than half have ever closed. Across the cohort, 6,624 open cases are already past
 their target date, and **23.9%** of closed cases were closed as `Noted` or `Transitioned` rather
 than `Resolved`.
 

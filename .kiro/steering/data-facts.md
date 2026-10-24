@@ -27,7 +27,8 @@ one question beats extra layers.
 - `Noted` = "no action is required"; `Transitioned` = "reassigned to another agency" (311 data
   dictionary). Say **closed as Noted or Transitioned**, never that those cases went unfixed.
   A transitioned case may have been handled by the other agency; the data can't show it.
-- `on_time` is filled for open cases too. An open case marked OVERDUE is already past target.
+- Count "past target" from `target_close_date` < extract cutoff, **not** from `on_time`. The
+  flag lags for open cases: 384 open cases past target still read ONTIME (324 Street Light).
 - "Open" means `case_status = 'In progress'` (7,876). 18 more cases sit in `Create` or
   `Needs Reallocation`; leave them out and say so if asked.
 
@@ -46,9 +47,9 @@ daily; "now" pads every open case's wait. Fixing this moved Street Light from 14
 | --- | --- |
 | Cases opened since 2026-07-01 | 56,797 |
 | Closed / still open | 48,903 / 7,876 |
-| Still open **and** past the city's target date | **6,240** |
+| Still open **and** past the city's target date | **6,624** |
 | Closed as `Noted` or `Transitioned` | **11,701 of 48,903 = 23.9%** |
-| On time among closed / counting open-and-overdue as late | 86.5% / 76.7% |
+| On time among closed / counting open-and-past-target as late | 86.5% / 76.2% |
 
 ## Headline services (days)
 
@@ -69,5 +70,5 @@ Tree or Stump Removal 2.11 → 10.74 d.
 - Kaplan–Meier assumes open cases are independent of eventual close time. If the city defers
   hard cases, the estimate is **optimistic**; the truth is slower.
 - Nothing here speaks to waits longer than ~115 days.
-- "6,240 open cases past their target" is a count at one moment, not a rate. No denominator.
+- "6,624 open cases past their target" is a count at one moment, not a rate. No denominator.
 - The income-gradient story is disproven. Do not reintroduce it. No causal claims.

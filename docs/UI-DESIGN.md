@@ -12,7 +12,7 @@ treat it as a stable API and do not edit it. Everything here is the view layer.
 
 Two audiences want opposite things from the same page.
 
-A **resident** wants one plain answer: *if I report this, how long until it is actually fixed?*
+A **resident** wants one plain answer: *if I report this, how long until the city closes it, and how often is it resolved?*
 They do not know what Kaplan–Meier is and should not have to.
 
 A **judge or journalist** wants the audit: the estimator, the sample size, the censoring, the

@@ -69,14 +69,20 @@ function quote(value: string): string {
 
 const COHORT_FILTER = `open_date::timestamp >= ${quote(COHORT_START)}`
 
-/** The three headline tiles. One round trip. */
-export async function fetchCohortTotals(): Promise<CohortTotals> {
+/**
+ * The three headline tiles. One round trip.
+ *
+ * "Overdue" compares target_close_date with the extract cutoff rather than reading on_time:
+ * the flag lags for open cases (Street Light Outage cases months past target still read ONTIME).
+ */
+export async function fetchCohortTotals(cutoff: number): Promise<CohortTotals> {
+  const cut = quote(new Date(cutoff).toISOString())
   const unresolved = UNRESOLVED_REASONS.map(quote).join(',')
   const rows = await runSql<Record<string, string>>(`
     SELECT COUNT(*) AS cohort_n,
            SUM(CASE WHEN case_status='Closed' THEN 1 ELSE 0 END) AS closed,
            SUM(CASE WHEN case_status='In progress' THEN 1 ELSE 0 END) AS open_now,
-           SUM(CASE WHEN case_status='In progress' AND on_time='OVERDUE' THEN 1 ELSE 0 END) AS open_overdue,
+           SUM(CASE WHEN case_status='In progress' AND target_close_date::timestamptz < ${cut}::timestamptz THEN 1 ELSE 0 END) AS open_overdue,
            SUM(CASE WHEN case_status='Closed' AND closure_reason IN (${unresolved}) THEN 1 ELSE 0 END) AS closed_unresolved
     FROM "${RESOURCE}"
     WHERE ${COHORT_FILTER}`)
@@ -145,7 +151,7 @@ export async function fetchNeighborhoodOnTime(serviceName: string) {
  */
 export async function fetchExtractCutoff(): Promise<number> {
   const [r] = await runSql<{ mo: string; mc: string }>(
-    `SELECT MAX(open_date) AS mo, MAX(close_date) AS mc FROM "${RESOURCE}"`,
+    `SELECT MAX(open_date::timestamptz) AS mo, MAX(close_date::timestamptz) AS mc FROM "${RESOURCE}"`,
   )
   return Math.max(parseTimestamp(r.mo), parseTimestamp(r.mc))
 }

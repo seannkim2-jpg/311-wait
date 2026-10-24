@@ -15,7 +15,7 @@ is and isn't documented so the wording stays defensible.
 | Targets | "80% of potholes … within 1 business day"; "80% of streetlight outages … within 10 business days". | CityScore metric definitions PDF, labelled LEGACY on the portal. Quoted by our research agent; the PDF's text could not be extracted locally, so **not re-verified**. The data's own `target_close_date` is consistent: median target 1 day for Pothole, 14 calendar days for Street Light Outage. |
 | Does Boston publish a 311 median closure time? | None found on boston.gov, CityScore, Analyze Boston or BOS:311. | Research agent search |
 | What does `on_time` mean? | "Whether the case was closed within the SLA. 'ONTIME' if the case was closed on or before the Target Close Date, 'OVERDUE' otherwise." | [311 data dictionary, new system](https://data.boston.gov/dataset/8048697b-ad64-4bfc-b090-ee00169f2323/resource/6e443a5d-8027-41d5-9574-35e8f84b8284/download/311-service-requests-data-dictionary-new-system.pdf), p. 2 (read) |
-| Is `on_time` set for open cases? | **Yes**, despite the dictionary's wording. Cohort: In progress 1,636 ONTIME, 6,240 OVERDUE. For an open case OVERDUE can only mean already past target. | Live query, `data/numbers.json` |
+| Is `on_time` set for open cases? | **Yes**, despite the dictionary's wording, but **it lags**. Cohort: 6,240 open cases read OVERDUE, yet by `target_close_date` 6,624 are past target at the extract cutoff; 384 past-target cases still read ONTIME, 324 of them Street Light Outage. For closed cases the flag matches the dates (15 disagreements in 48,903). We count overdue from the dates. | Live query, `data/numbers.json` |
 | What do `Noted` and `Transitioned` mean? | "'Transitioned' if the case was reassigned to another agency / 'Noted' if no action is required / 'Resolved' if the case was resolved." | Data dictionary p. 1 (read) |
 
 The data also contains closure reasons the dictionary does not list: `Resolved successfully`
@@ -33,8 +33,8 @@ The data also contains closure reasons the dictionary does not list: `Resolved s
   currently show no values in the published metric list, so Wait Audit gives a resident a
   number where that file has none. Say "in CityScore's published metric list", not "the city
   stopped measuring" — the dashboard may draw on another source.
-- **New, needs no inference:** 6,240 open cases are already marked OVERDUE by the city's own
-  field.
+- **New, needs no inference:** 6,624 open cases are past the city's own target date
+  (`target_close_date`). Don't use the `on_time` flag for open cases; it lags.
 
 `scripts/refresh_numbers.py` lints the live docs for the withdrawn phrases and fails if any
 come back.

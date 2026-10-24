@@ -30,19 +30,19 @@ HEADLINE = ("Litter & Debris", "Pothole", "Street Light Outage", "Sidewalk Repai
 MIN_SERVICE_N = 200  # same floor as fetchServices() in src/lib/boston311.ts
 
 # Docs a judge or agent reads as current. docs/research/ is the dated history and is exempt.
-LIVE_DOCS = ["README.md", "docs/ANALYSIS.md", "docs/PLAN.md", "docs/ROADMAP.md",
-             "docs/UI-DESIGN.md", "docs/UI-PLAN.md", "docs/KIRO-USAGE.md", "docs/DEMO.md",
-             ".kiro/steering", ".kiro/specs", "src"]
+LIVE_DOCS = ["README.md", "docs", ".kiro/steering", ".kiro/specs", "src"]
 BANNED = {
     r"computed \W*only over|excludes open cases|only (over|counts) closed": "no source says how Boston computes its on-time rate",
     r"city'?s own (measure|method|way of measuring|figure|number|metric)|city'?s method": "say 'median among closed cases'",
     r"city-style": "say 'median among closed cases'",
     r"city'?s published (figure|median|number)|publish(es|ed)? (an? )?\W*(on-time rate|median)": "Boston publishes no 311 median; CityScore's on-time rules are undocumented",
     r"published (311 )?on-time rate": "CityScore has per-service on-time measures only; calculation unsourced",
-    r"not (actually )?fixed|never (actually )?(resolved|fixed)|without being (fixed|resolved)|genuine(ly)? \W*resol":
+    r"not (actually )?(fixed|resolved)|never (actually )?(resolved|fixed)|without being (fixed|resolved)|genuine(ly)? \W*resol|actually fixed":
         "Noted = no action required, Transitioned = reassigned to another agency; say 'closed as Noted or Transitioned'",
     r"(?<![\d,])7,840(?![\d,])": "stale all-time overdue count; use data/numbers.json",
     r"\b(122|361|449)[ -]?d(ay)?\b": "came from the contaminated pre-cohort tail",
+    r"\b(54|52|31|28) ?d\b.*\b(52|31|28) ?d\b": "neighborhood medians from the contaminated first pass",
+    r"3\.09 ?[x×]|\b4\.75 ?d|\b17\.7%|\b6,240\b": "superseded figure; read data/numbers.json",
 }
 
 
@@ -93,23 +93,33 @@ def service_stats(name, cutoff):
                           target_close_date FROM "{RESOURCE}"
                    WHERE {COHORT} AND service_name = {q(name)}
                      AND case_status IN ('Closed','In progress') LIMIT 32000""")
-    assert len(rows) < 32000, f"{name}: hit the row cap, results would be truncated"
-    obs, targets, closed_ontime, open_overdue, oldest_open = [], [], 0, 0, 0.0
+    if len(rows) >= 32000:
+        raise RuntimeError(f"{name}: hit the row cap, results would be truncated")
+    obs, targets, oldest_open = [], [], 0.0
+    closed_ontime = closed_with_target = open_overdue = flag_says_ontime = 0
     for r in rows:
         opened = parse_ts(r["open_date"])
-        if r["target_close_date"]:
-            targets.append((parse_ts(r["target_close_date"]) - opened).total_seconds() / 3600)
+        target = parse_ts(r["target_close_date"]) if r["target_close_date"] else None
+        if target:
+            targets.append((target - opened).total_seconds() / 3600)
         if r["case_status"] == "Closed" and r["close_date"]:
-            h = (parse_ts(r["close_date"]) - opened).total_seconds() / 3600
+            closed_at = parse_ts(r["close_date"])
+            h = (closed_at - opened).total_seconds() / 3600
             if h < 0:
                 continue  # same rule as toObservations(): drop clock-skew rows
             obs.append((h, 2 if r["closure_reason"] in NOT_RESOLVED else 1))
-            closed_ontime += r["on_time"] == "ONTIME"
+            if target:
+                closed_with_target += 1
+                closed_ontime += closed_at <= target
         elif r["case_status"] == "In progress":
             h = (cutoff - opened).total_seconds() / 3600
             if h >= 0:
                 obs.append((h, 0))
-                open_overdue += r["on_time"] == "OVERDUE"
+                # Dates, not the on_time flag: the flag lags for open cases (Street Light
+                # Outage cases months past target still read ONTIME).
+                if target and target < cutoff:
+                    open_overdue += 1
+                    flag_says_ontime += r["on_time"] == "ONTIME"
                 oldest_open = max(oldest_open, h)
 
     closed = [h for h, c in obs if c]
@@ -125,6 +135,7 @@ def service_stats(name, cutoff):
         "open": n_open,
         "openPct": pct(n_open, len(obs)),
         "openPastTarget": open_overdue,
+        "openPastTargetButFlaggedOnTime": flag_says_ontime,
         "oldestOpenDays": days(oldest_open),
         "medianTargetDays": days(median(targets)) if targets else None,
         "medianClosedOnlyDays": days(naive),
@@ -136,10 +147,10 @@ def service_stats(name, cutoff):
         "resolvedPct": round(100 * cif[1], 1),
         "notedOrTransitionedPct": round(100 * cif[2], 1),
         "stillOpenPct": round(100 * still, 1),
-        "onTimeAmongClosedPct": pct(closed_ontime, len(closed)),
+        "onTimeAmongClosedPct": pct(closed_ontime, closed_with_target),
         # Open cases already past target are late whatever happens next; open cases not yet
         # due are undecided, so they stay out of both numerator and denominator.
-        "onTimeCountingOverdueOpenPct": pct(closed_ontime, len(closed) + open_overdue),
+        "onTimeCountingOverdueOpenPct": pct(closed_ontime, closed_with_target + open_overdue),
         "_obs": obs,
     }
 
@@ -152,14 +163,17 @@ def lint_docs():
             continue
         files = [path] if os.path.isfile(path) else [
             os.path.join(d, f) for d, _, fs in os.walk(path) for f in fs
-            if f.endswith((".md", ".ts", ".tsx")) and "__fixtures__" not in d]
+            if f.endswith((".md", ".ts", ".tsx")) and "__fixtures__" not in d
+            and not d.startswith(os.path.join(ROOT, "docs", "research"))]
         for f in files:
-            for i, line in enumerate(open(f, encoding="utf-8"), 1):
-                if re.search(r"\b(never|do not|don't) (call|say|use)\b", line, re.I):
-                    continue  # a guardrail naming the bad figure is fine
-                for pat, why in BANNED.items():
-                    if re.search(pat, line, re.I):
-                        hits.append(f"{os.path.relpath(f, ROOT)}:{i}: {why}")
+            text = open(f, encoding="utf-8").read()
+            flat = text.replace("\n", " ")  # same offsets, so phrases split across lines still match
+            for pat, why in BANNED.items():
+                for m in re.finditer(pat, flat, re.I):
+                    near = flat[max(0, m.start() - 160):m.end() + 40]
+                    if re.search(r"\b(never|do not|don't) (call|say|use)\b|withdrawn|supersed|replaces an earlier", near, re.I):
+                        continue  # a guardrail or correction naming the bad claim is fine
+                    hits.append(f"{os.path.relpath(f, ROOT)}:{text.count(chr(10), 0, m.start()) + 1}: {why}")
     return hits
 
 
@@ -174,22 +188,33 @@ def refresh():
 
     monthly = sql(f"""SELECT to_char(date_trunc('month', open_date::timestamp), 'YYYY-MM') m,
                              COUNT(*) n FROM "{RESOURCE}" GROUP BY 1 ORDER BY 1""")
-    status = sql(f"""SELECT case_status, on_time, COUNT(*) n FROM "{RESOURCE}"
-                     WHERE {COHORT} GROUP BY 1, 2 ORDER BY 1, 2""")
+    cut = f"'{cutoff.isoformat(sep=' ')}'"
+    status = sql(f"""SELECT case_status, on_time,
+                            CASE WHEN target_close_date IS NULL THEN 'none'
+                                 WHEN case_status = 'Closed' AND close_date::timestamp <= target_close_date::timestamp THEN 'met'
+                                 WHEN case_status = 'Closed' THEN 'missed'
+                                 WHEN target_close_date::timestamp < {cut} THEN 'past'
+                                 ELSE 'future' END AS by_date, COUNT(*) n
+                     FROM "{RESOURCE}" WHERE {COHORT} GROUP BY 1, 2, 3""")
     reasons = sql(f"""SELECT closure_reason, COUNT(*) n FROM "{RESOURCE}"
                       WHERE {COHORT} AND case_status='Closed' GROUP BY 1 ORDER BY 2 DESC""")
     hoods = sql(f"""SELECT neighborhood, COUNT(*) n,
                            SUM(CASE WHEN latitude IS NOT NULL THEN 1 ELSE 0 END) mappable
                     FROM "{RESOURCE}" WHERE {COHORT} AND case_status='In progress'
-                      AND on_time='OVERDUE' GROUP BY 1 ORDER BY 2 DESC""")
+                      AND target_close_date::timestamp < {cut} GROUP BY 1 ORDER BY 2 DESC""")
     svc_list = sql(f"""SELECT service_name, COUNT(*) n FROM "{RESOURCE}"
                        WHERE {COHORT} AND case_status IN ('Closed','In progress')
                        GROUP BY 1 HAVING COUNT(*) >= {MIN_SERVICE_N} ORDER BY 2 DESC""")
 
-    by = {(r["case_status"], r["on_time"]): int(r["n"]) for r in status}
-    n = sum(by.values())
-    closed = sum(v for (s, _), v in by.items() if s == "Closed")
-    open_now = sum(v for (s, _), v in by.items() if s == "In progress")
+    def count(status_=None, flag=None, date=None):
+        return sum(int(r["n"]) for r in status if status_ in (None, r["case_status"])
+                   and flag in (None, r["on_time"]) and date in (None, r["by_date"]))
+
+    n = count()
+    closed = count("Closed")
+    open_now = count("In progress")
+    met, missed = count("Closed", date="met"), count("Closed", date="missed")
+    past = count("In progress", date="past")
     reason_n = {r["closure_reason"] or "(blank)": int(r["n"]) for r in reasons}
     not_resolved = sum(reason_n.get(r, 0) for r in NOT_RESOLVED)
     cohort = {
@@ -197,14 +222,16 @@ def refresh():
         "closed": closed,
         "open": open_now,
         "otherStatus": n - closed - open_now,
-        "openPastTarget": by.get(("In progress", "OVERDUE"), 0),
-        "openNotYetDue": by.get(("In progress", "ONTIME"), 0),
+        "openPastTarget": past,
+        "openPastTargetButFlaggedOnTime": count("In progress", "ONTIME", "past"),
+        "openNotYetDue": count("In progress", date="future"),
+        "openNoTarget": count("In progress", date="none"),
         "closedNotedOrTransitioned": not_resolved,
         "closedNotedOrTransitionedPct": pct(not_resolved, closed),
         "closureReasons": reason_n,
-        "onTimeAmongClosedPct": pct(by.get(("Closed", "ONTIME"), 0), closed),
-        "onTimeCountingOverdueOpenPct": pct(by.get(("Closed", "ONTIME"), 0),
-                                            closed + by.get(("In progress", "OVERDUE"), 0)),
+        "onTimeAmongClosedPct": pct(met, met + missed),
+        "onTimeCountingOverdueOpenPct": pct(met, met + missed + past),
+        "closedFlagDisagreesWithDates": count("Closed", "ONTIME", "missed") + count("Closed", "OVERDUE", "met"),
     }
 
     services = {}
@@ -220,7 +247,7 @@ def refresh():
     check(cohort["otherStatus"] < 0.01 * n, f"{cohort['otherStatus']} cohort cases in other statuses")
     check(sum(reason_n.values()) == closed, "closure reasons don't sum to closed cases")
     age_h = (pulled - cutoff).total_seconds() / 3600
-    check(age_h < 48, f"extract cutoff is {age_h:.0f} h old; the city may have stopped refreshing it")
+    check(0 <= age_h < 48, f"extract cutoff is {age_h:.0f} h from now; the city may have stopped refreshing it")
     full = [int(r["n"]) for r in monthly if r["m"] >= COHORT_START[:7]][:-1]  # last month is partial
     check(not full or min(full) > 0.7 * max(full),
           f"cohort months are uneven {full}; the cohort window may no longer be complete")
@@ -295,8 +322,8 @@ def render_md(o):
         "documents how it is computed.",
         "- `Noted` means no action is required and `Transitioned` means reassigned to another agency "
         "(311 data dictionary). Say *closed as Noted or Transitioned*, not *never fixed*.",
-        "- The `on_time` column is filled for open cases too. For an open case, OVERDUE means it is "
-        "already past its target close date.",
+        "- Past target is measured from `target_close_date` against the extract cutoff, not from the "
+        "`on_time` flag, which lags for open cases (see the row below).",
         "",
         "## Cohort",
         "",
@@ -306,12 +333,14 @@ def render_md(o):
         f"| Closed | {c['closed']:,} |",
         f"| Still open | {c['open']:,} |",
         f"| Still open and past the city's target date | **{c['openPastTarget']:,}** |",
+        f"| … of which the city's `on_time` flag still reads ONTIME | {c['openPastTargetButFlaggedOnTime']:,} |",
         f"| Still open, not yet due | {c['openNotYetDue']:,} |",
+        f"| Still open, no target date | {c['openNoTarget']:,} |",
         f"| Other statuses (Create, Needs Reallocation) | {c['otherStatus']:,} |",
         f"| Closed as Noted or Transitioned | **{c['closedNotedOrTransitioned']:,} of {c['closed']:,} "
         f"= {c['closedNotedOrTransitionedPct']}%** |",
         f"| Closure reasons | {', '.join(f'{k} {v:,}' for k, v in c['closureReasons'].items())} |",
-        f"| On time, among closed cases | {c['onTimeAmongClosedPct']}% |",
+        f"| On time (closed by target date), among closed cases with a target | {c['onTimeAmongClosedPct']}% |",
         f"| On time, counting open cases already past target as late | {c['onTimeCountingOverdueOpenPct']}% |",
         "",
         f"Open and past target: {mappable:,} of {c['openPastTarget']:,} have coordinates for the map.",
