@@ -54,6 +54,19 @@ python3 -m pip install lifelines
 python3 scripts/validate_against_lifelines.py      # third opinion vs the standard library
 ```
 
+## Checking this repository with Kiro CLI
+
+Run from this checkout after signing in with `kiro-cli login`:
+
+```bash
+./scripts/check-with-kiro.sh
+```
+
+The script checks this checkout against the linked GitHub repository's `main` branch. It
+fetches `origin/main`, runs the npm test, lint, and build scripts, and asks Kiro CLI to review
+repository files and local changes. It does not commit or push. If you later want to check
+another Git checkout too, pass both paths: `./scripts/check-with-kiro.sh . /path/to/repo`.
+
 ## Running it
 
 _Clone-to-running instructions. A judge must get this working for free, from scratch._
