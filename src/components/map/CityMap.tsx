@@ -60,7 +60,7 @@ export default function CityMap({ service }: Props) {
     let alive = true
     loadOpenCases()
       .then((c) => alive && setCases(c))
-      .catch((e: Error) => alive && setError(e.message))
+      .catch((e: Error) => alive && setError(`Open case data did not load: ${e.message}`))
     return () => {
       alive = false
     }
@@ -78,24 +78,30 @@ export default function CityMap({ service }: Props) {
   // Map: created once, the first time the section scrolls near the viewport.
   useEffect(() => {
     if (!seen || !containerRef.current || mapRef.current) return
-    ensureProtocol()
     const origin = window.location.origin
-    const map = new maplibregl.Map({
-      container: containerRef.current,
-      style: basemapStyle(origin),
-      center: BOSTON_CENTER,
-      zoom: 10.2,
-      minZoom: 10,
-      maxZoom: 16,
-      maxBounds: [
-        [-71.32, 42.18],
-        [-70.86, 42.46],
-      ],
-      attributionControl: { compact: true },
-      dragRotate: false,
-      pitchWithRotate: false,
-      cooperativeGestures: true,
-    })
+    let map: MLMap
+    try {
+      ensureProtocol()
+      map = new maplibregl.Map({
+        container: containerRef.current,
+        style: basemapStyle(origin),
+        center: BOSTON_CENTER,
+        zoom: 10.2,
+        minZoom: 10,
+        maxZoom: 16,
+        maxBounds: [
+          [-71.32, 42.18],
+          [-70.86, 42.46],
+        ],
+        attributionControl: { compact: true },
+        dragRotate: false,
+        pitchWithRotate: false,
+        cooperativeGestures: true,
+      })
+    } catch {
+      setError('The map could not start. The neighborhood list still shows the same counts.')
+      return
+    }
     map.touchZoomRotate.disableRotation()
     map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'bottom-right')
     mapRef.current = map
@@ -378,7 +384,7 @@ export default function CityMap({ service }: Props) {
           )}
           {error && (
             <p role="alert" className="absolute inset-x-4 bottom-4 rounded-xl bg-white p-3 text-sm text-overdue shadow">
-              The open-cases query did not complete: {error}
+              {error}
             </p>
           )}
         </div>
