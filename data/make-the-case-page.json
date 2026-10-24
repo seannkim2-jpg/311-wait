@@ -1,0 +1,21 @@
+{
+  "_about": "Figures read off the rendered page (vite preview of this branch, headless Chromium, 2026-10-24 ~16:25 ET, after the whole-day fix). Checked by: python3 scripts/check_make_the_case.py --compare data/make-the-case-page.json",
+  "cases": [
+    { "caseId": "BCS-00327633", "kind": "shown", "in100": 14, "similar": 296 },
+    { "caseId": "BCS-00341757", "kind": "shown", "in100": 7, "similar": 445 },
+    { "caseId": "BCS-00331397", "kind": "shown", "in100": 1, "similar": 1405 },
+    { "caseId": "BCS-00352721", "kind": "shown", "in100": 28, "similar": 721 },
+    { "caseId": "BCS-00241221", "kind": "beyond-data", "in100": null, "similar": null }
+  ],
+  "cambridge": {
+    "all": { "n": 7361, "open": 1086, "medianClosedOnlyDays": 2.0, "kmMedianDays": 2.9 },
+    "Tree Pruning Request": { "n": 317, "open": 157, "medianClosedOnlyDays": 3.1, "kmMedianDays": 48.5 },
+    "Vehicle blocking a bike lane": { "n": 1201, "open": 66, "medianClosedOnlyDays": 2.9, "kmMedianDays": 3.0 }
+  },
+  "bostonHeroes": {
+    "Street Light Outage": { "medianClosedOnlyDays": 4.7, "kmMedianDays": 14.5 },
+    "Pothole": { "medianClosedOnlyDays": 1.8, "kmMedianDays": 3.1 },
+    "Sidewalk Repair": { "medianClosedOnlyDays": 0.88, "kmMedianDays": null },
+    "Litter & Debris": { "medianClosedOnlyDays": 0.4, "kmMedianDays": 0.46 }
+  }
+}

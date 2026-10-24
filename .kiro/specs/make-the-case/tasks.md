@@ -15,7 +15,7 @@ Deadline 20:00 ET. One commit per step. Cut order at the bottom.
 - [x] **T-10** `Cambridge` section (MC-08)
 - [x] **T-11** Skills review (`frontend-a11y`, `tufte-data-viz`, `make-interfaces-feel-better`,
       `web-design-guidelines`); axe; 390 px check (MC-10)
-- [ ] **T-12** End check: tests, build, lint, claim lint, `check_make_the_case.py` live and
+- [x] **T-12** End check: tests, build, lint, claim lint, `check_make_the_case.py` live and
       `--compare` against the rendered page (MC-01, MC-11)
 - [ ] **T-13** `docs/KIRO-USAGE.md` entries; pull request into `main`
 

@@ -349,10 +349,66 @@ def golden():
 
 
 def compare(page_path):
-    """Compare figures read off the rendered page against the last live run."""
+    """Compare figures read off the rendered page against independent recomputation.
+
+    page.json holds what the browser showed:
+      cases:        [{caseId, service, ageHours, in100 | null, similar | null, kind}]
+      cambridge:    {"all" | issue type: {n, open, medianClosedOnlyDays, kmMedianDays}}
+      bostonHeroes: {service: {kmMedianDays, medianClosedOnlyDays}}
+    """
     want = json.load(open(os.path.join(ROOT, "data/make-the-case.json")))
+    numbers = json.load(open(os.path.join(ROOT, "data/numbers.json")))
     got = json.load(open(page_path))
     failures = []
+
+    # Each looked-up case: fetch it here, work out its age here, recompute the chance here.
+    snap = boston_sql(f'SELECT MAX(open_date::timestamp) mo, MAX(close_date::timestamp) mc FROM "{BOSTON}"')[0]
+    cutoff = max(parse_boston(snap["mo"]), parse_boston(snap["mc"]))
+    cache = {}
+    for c in got.get("cases", []):
+        if not CASE_ID.match(c["caseId"]):
+            failures.append(f"page reported a malformed ID {c['caseId']!r}")
+            continue
+        row = boston_sql(f"""SELECT service_name, case_status, open_date FROM "{BOSTON}"
+                             WHERE case_id = '{c['caseId']}' LIMIT 1""")[0]
+        service = row["service_name"]
+        # Whole days, as the page's sentence states them ("still open after 33 days").
+        age_days = int((cutoff - parse_boston(row["open_date"])).total_seconds() // 86400)
+        c["ageHours"] = age_days * 24
+        if row["case_status"] != "In progress":
+            failures.append(f"{c['caseId']} is not open; the page should show no chance")
+            continue
+        if service not in cache:
+            rows = boston_sql(f"""SELECT case_status, open_date, close_date FROM "{BOSTON}"
+                WHERE open_date::timestamp >= '{COHORT_START}' AND service_name = '{service.replace("'", "''")}'
+                  AND case_status IN ('Closed','In progress') LIMIT 32000""")
+            obs = boston_obs(rows, cutoff)
+            cache[service] = (obs, km_curve(obs))
+        obs, curve = cache[service]
+        ch = conditional(obs, curve, c["ageHours"], WINDOW_DAYS * 24)
+        risk = at_risk(obs, c["ageHours"])
+        if ch is None:
+            expect = "beyond-data"
+        elif risk < MIN_AT_RISK:
+            expect = "too-few"
+        else:
+            expect = "shown"
+        if c["kind"] != expect:
+            failures.append(f"{c['caseId']}: page {c['kind']}, check {expect}")
+        elif expect == "shown":
+            if c["in100"] != round(100 * ch) or c["similar"] != risk:
+                failures.append(f"{c['caseId']}: page {c['in100']} in 100 of {c['similar']}, "
+                                f"check {round(100 * ch)} in 100 of {risk}")
+        print(f"  {c['caseId']} {service}, open {c['ageHours'] / 24:.1f} d: page {c['kind']} {c.get('in100')}"
+              f" / check {expect} {None if ch is None else round(100 * ch)} ({risk} similar)")
+
+    # Existing hero figures must still match data/numbers.json (MC-11).
+    for service, v in got.get("bostonHeroes", {}).items():
+        ref = numbers["services"][service]
+        for field in ("kmMedianDays", "medianClosedOnlyDays"):
+            if (v[field] is None) != (ref[field] is None) or (v[field] is not None and abs(v[field] - ref[field]) > 0.06):
+                failures.append(f"{service} {field}: page {v[field]}, numbers.json {ref[field]}")
+        print(f"  hero {service}: page {v}, numbers.json km {ref['kmMedianDays']} closed-only {ref['medianClosedOnlyDays']}")
     for key, value in got.get("cambridge", {}).items():
         ref = want["cambridge"]["all"] if key == "all" else want["cambridge"]["issueTypes"].get(key)
         if ref is None:
@@ -367,8 +423,8 @@ def compare(page_path):
                     if r["service"] == c["service"] and r["ageDays"] == c["ageDays"]), None)
         if ref and c["in100"] != ref["in100"]:
             failures.append(f"{c['service']} at {c['ageDays']} d: page {c['in100']} in 100, check {ref['in100']}")
-    print(f"compared {len(got.get('cambridge', {}))} Cambridge rows and "
-          f"{len(got.get('conditionalChance', []))} chances against data/make-the-case.json")
+    print(f"compared {len(got.get('cases', []))} looked-up cases, {len(got.get('cambridge', {}))} Cambridge "
+          f"views and {len(got.get('bostonHeroes', {}))} hero figures")
     return failures, []
 
 
