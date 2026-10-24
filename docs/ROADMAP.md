@@ -14,12 +14,12 @@
 | **Third-opinion validation against `lifelines`** | **Done, agrees to 6 decimals** |
 | Spec `.kiro/specs/service-wait-audit/` | Done, 843 lines, by Kiro |
 | `ANALYSIS.md`, `PLAN.md`, `UI-DESIGN.md` | Done |
-| UI | **Not started** — the website session's job |
-| `KIRO-USAGE.md` | Skeleton only |
-| Vercel deploy | Not started |
+| UI | Done: hero, case lookup, Already waiting?, map, charts, Cambridge |
+| `KIRO-USAGE.md` | Done |
+| Vercel deploy | Done: <https://311-wait.vercel.app/> |
 | Demo video | Not started |
 
-`npm test` → 17 passing.
+`npm test` → 164 passing.
 
 ### Three implementations agree
 

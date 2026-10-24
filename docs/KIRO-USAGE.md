@@ -144,3 +144,65 @@ What testing changed on this branch:
   group of cases.
 - **Hooks in Kiro Web.** Kiro Web stores hooks but does not run them, so in this session each
   hook's command was run by hand at every step. The hook files fire in the Kiro IDE and CLI V3.
+
+## Answers to the judging questions
+
+**Which Kiro tools, and how they differed.** We used three Kiro surfaces, each for the job it
+suited best. The **CLI** worked well for long research and statistics sessions run from the repo
+root. It also works as a scriptable reviewer, because `scripts/check-with-kiro.sh` runs it
+non-interactively before merges. The **autonomous agent** handled a well-bounded planning task
+(the UI plan and licence check) and opened a PR on its own. **Kiro Web (Vibe mode)** handled the
+interactive UI and feature work. There we could approve a plan, then watch Kiro build and check
+it in a headless browser in the same session. The trade-off we hit is that Kiro Web stores hooks
+but does not fire them (see below).
+
+**Spec-driven vs vibe coding.** Every non-trivial feature got a spec under `.kiro/specs/`
+(`service-wait-audit`, `make-the-case`, `closure-forecast`), committed before any code. Each one
+followed the same order: a check script, then requirements as numbered SHALL statements, then the
+design, then tasks ticked off in the commit that does them. Vibe mode was still useful, but for
+exploration and visual polish rather than statistics. The difference was clearest when something
+went wrong. A spec let us say *which requirement* was wrong (the fast-check counterexample, the
+closure-forecast release gate) and fix it in one place. With vibe coding, the same error would
+have been an argument in a chat that the next session forgets.
+
+**Agent hooks.** Three `PostFileSave` hooks encode our three non-negotiables. `claim-lint-on-save`
+keeps the copy inside the sourced wording. `tests-on-lib-save` reruns the 164 tests and forbids
+loosening a property to pass. `a11y-review-on-component-save` reviews keyboard access, labels,
+contrast and 390 px width. Each prompt says what *not* to do (don't weaken the lint, don't relax
+a tolerance), because that is where an agent cuts corners. Kiro Web doesn't execute hooks, so in
+those sessions each hook's command was run by hand at every step. The hooks fire as written in
+the IDE and CLI.
+
+**Steering strategy.** The biggest gain came from turning *corrections* into steering instead of
+chat messages (`data-facts.md`). After that came pointing steering at a generated file
+(`data/numbers.json`) rather than hand-typed numbers. Third was **conditional inclusion**:
+`claims.md` loads only when `src/components/**` or `docs/**` is being edited, so wording rules
+don't crowd the context during statistics work.
+
+**MCP and Powers.** The **Playwright power** (which bundles the Playwright MCP server) let Kiro
+check its own UI in a real browser, something it can't do from source code alone. Kiro took
+desktop and 390 px screenshots, ran axe-core, scripted keyboard walkthroughs and typed real case
+IDs into the live lookup. The **github-cli power** handled branches, PRs and merges from Kiro Web
+through `gh api`. The twelve **agent skills** in `.kiro/skills/` (above) bundled outside expertise
+we would not otherwise have applied, from cartography to Tufte-style charts. Each one changed a
+specific, recorded decision.
+
+**Property-based testing.** PBT is enabled for every statistical invariant: survival curves in
+[0, 1] and non-increasing, incidences summing to one, `conditionalClose` monotone in the window.
+It also covers input safety (`parseCaseId` across 2,000 arbitrary strings) and copy rules (the
+summary never predicts the case). PBT found two errors that unit tests would have missed, both in
+our *specification*, not in Kiro's code (see above).
+
+## Pre-submission check, 2026-10-24
+
+Kiro Web (Vibe mode, Claude Opus 5.5), using the Playwright power, went through the rules page
+line by line against the repo and the live site:
+
+- `npm ci`, `npm test` (164 passing), `npm run lint` and `npm run build` all pass from a clean
+  clone. `/.kiro` is committed and not in `.gitignore`. The repo is public.
+- On the live site Kiro typed the README's test case IDs into the lookup, switched to Cambridge,
+  and loaded the page at 390 px (no horizontal scroll). The console showed no errors.
+- **Found and fixed:** after a malformed case ID, the hidden screen-reader status line still
+  announced the previous "Found …" result. `CaseLookup` now clears it.
+- Wrote `docs/SUBMISSION.md`, which has copy-ready form text, testing steps and a 3-minute video
+  plan.
