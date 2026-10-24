@@ -82,6 +82,10 @@ This project is built with [Kiro](https://kiro.dev). Team setup instructions are
 [`docs/kiro-setup.md`](docs/kiro-setup.md); the submission write-up on how Kiro was used
 is in [`docs/KIRO-USAGE.md`](docs/KIRO-USAGE.md).
 
+[OpenAI Codex](https://openai.com/codex/) contributed repository review and build, lint,
+and clean-checkout test fixes ([PR #5](https://github.com/seannkim2-jpg/kiro-hackachusetts/pull/5),
+[PR #6](https://github.com/seannkim2-jpg/kiro-hackachusetts/pull/6)).
+
 `/.kiro` at the repo root is required evidence for judging and must never be added to
 `.gitignore`.
 
