@@ -9,6 +9,7 @@ import { BiasCallout } from './components/BiasCallout'
 import { OutcomeChart } from './components/charts/OutcomeChart'
 import { NeighborhoodTable } from './components/NeighborhoodTable'
 import { Footer, Method } from './components/Method'
+import { CaseLookup } from './components/CaseLookup'
 
 // MapLibre is the heaviest dependency; load it after the answer has painted.
 const CityMap = lazy(() => import('./components/map/CityMap'))
@@ -103,6 +104,14 @@ export default function App() {
 
         <Hero overview={overview} audit={audit} selected={service} loading={loading} onSelect={select} />
         <div ref={heroEndRef} aria-hidden />
+
+        <Section
+          id="my-case"
+          title="Where does my case stand?"
+          lede="Type your case number to see how long it has been open, what happened to similar cases at the same age, and a short summary you can send to someone who can act on it."
+        >
+          <CaseLookup />
+        </Section>
 
         <Section
           id="map"
