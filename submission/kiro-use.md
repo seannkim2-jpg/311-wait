@@ -1,6 +1,6 @@
 # How Kiro was used — paste into the form
 
-Kiro was part of the build, not just the final review. I used **Kiro CLI** to explore concepts, check the public data, red-team the statistical framing, write the first feature spec and implement the statistics with property-based tests. I used a **Kiro autonomous agent** for the UI architecture plan, and **Kiro Web** to plan and build the interface, case lookup, Cambridge view and closure calculator. The Web sessions could inspect rendered pages and run browser checks; CLI was useful for repository-wide reasoning and repeatable review from the terminal. The committed briefs, plans, specs and Kiro-authored commits show the sequence. I did not rely on Kiro IDE or Crew for this entry, so I do not claim work from them.
+I used Kiro throughout development. **Kiro CLI** helped me explore concepts, check the public data, red-team the statistical framing, write the first feature spec and implement the statistics with property-based tests. I used a **Kiro autonomous agent** for the UI architecture plan, and **Kiro Web** to plan and build the interface, case lookup, Cambridge view and closure calculator. The Web sessions could inspect rendered pages and run browser checks; CLI was useful for repository-wide reasoning and repeatable review from the terminal. The committed briefs, plans, specs and Kiro-authored commits show the sequence. I did not rely on Kiro IDE or Crew for this entry, so I do not claim work from them.
 
 ## Specs shaped the build
 
