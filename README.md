@@ -56,12 +56,19 @@ python3 scripts/validate_against_lifelines.py      # third opinion vs the standa
 
 ## Running it
 
-_Clone-to-running instructions. A judge must get this working for free, from scratch._
+No account, API key or backend. The page queries Boston's open-data API from the browser, and
+the map's basemap, boundaries and fonts are committed as static files in `public/map/`.
 
 ```bash
 git clone https://github.com/seannkim2-jpg/kiro-hackachusetts.git
 cd kiro-hackachusetts
+npm install
+npm run build && npm run preview   # production build at http://localhost:4173
+# or: npm run dev                  # development server
 ```
+
+`./scripts/build_map_assets.sh` rebuilds `public/map/` from the city's boundary file and a
+Protomaps build of OpenStreetMap (it needs the free `pmtiles` CLI).
 
 ## Built with Kiro
 

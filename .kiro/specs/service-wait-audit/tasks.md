@@ -164,6 +164,22 @@ export const SERVICES: string[]
 
 ## Phase 3 — Core UI above the fold (15:15–16:30)
 
+> **Status 2026-10-24 (Kiro Web, branch `wait-audit-ui`):** Phases 3–5 and T-70/T-71 are built.
+> Where the build differs from the task text below, the reasons are in
+> `docs/UI-VISUAL-PLAN.md` §7.
+> - T-30 → hero headline + `Hero.tsx` stat row (no separate tile component).
+> - T-31 → `ServicePicker.tsx` as a `toolbar` of `aria-pressed` buttons, so that arrows move
+>   focus and Space/Enter confirm, as REQ-11 asks.
+> - T-32/T-33 → `charts/OutcomeChart.tsx` and `charts/SurvivalChart.tsx`; KM renders first
+>   (REQ-09 amended).
+> - T-40 → `BiasCallout.tsx`. T-41 → `NeighborhoodTable.tsx` with n, on-time % and Wilson
+>   range. **Not yet built:** the per-neighborhood naive and KM median columns, which need
+>   per-neighborhood case rows from the data layer.
+> - T-50 → spread through the page where each note belongs, not one block.
+> - Added: `map/CityMap.tsx` (open-and-overdue map, MapLibre + static Protomaps basemap).
+> - T-70: axe-core run in a headless browser after every section had rendered: 0 violations.
+> - T-71: arrow keys, Enter and `aria-live` were checked with scripted keyboard input.
+
 ### T-30 `StatTiles.tsx`
 
 Tiles:
