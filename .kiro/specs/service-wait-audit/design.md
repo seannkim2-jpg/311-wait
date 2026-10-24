@@ -35,7 +35,7 @@ service times.
 July through October 2026 are internally consistent at 13,000–15,600 cases/month, so
 the window looks complete. The cohort has **n = 56,797** cases and a maximum observable
 duration of approximately 115 days (July 1 → October 24). The "longest wait" figures
-from earlier analyses (122 d, 361 d, 449 d) came from the contaminated pre-July tail and
+from earlier analyses came from the contaminated pre-July tail and
 are artifacts. **Do not use them.**
 
 ---
@@ -47,16 +47,18 @@ are artifacts. **Do not use them.**
 | Cases opened since 2026-07-01 | **56,797** |
 | Closed | **48,903** |
 | Still open | **7,876** |
-| Still open AND past city target | **6,240** |
+| Still open AND past city target | **6,624** |
 | Closed as `Noted` or `Transitioned` | **11,701 of 48,903 = 23.9%** |
 
 The 23.9% non-resolution finding is the most robust number in the dataset. It requires
 no statistical inference — it is a direct count from the `closure_reason` field — and it
 survives the cohort restriction unchanged.
 
-The 6,240 overdue count is a **prevalence count**, not a rate. It has no valid
+The 6,624 open-and-past-target count is a **prevalence count**, not a rate. It has no valid
 denominator. Do not divide it by total cases to produce a percentage; that conflates
 cases opened yesterday (not yet due) with cases opened three months ago (overdue).
+Count it from `target_close_date` against the extract cutoff, not from `on_time`: the flag
+lags for open cases (384 open cases past target still read ONTIME, 324 of them Street Light).
 
 ---
 
@@ -130,7 +132,9 @@ Paginate with `OFFSET` until exhausted. Expected ~56,797 rows.
 ```sql
 SELECT
   COUNT(*) AS total,
-  COUNT(*) FILTER (WHERE case_status = 'In progress' AND on_time = 'OVERDUE') AS open_overdue,
+  -- Overdue = target before the extract cutoff, not on_time. (CKAN rejects FILTER; the
+  -- shipped query in src/lib/boston311.ts uses SUM(CASE ...).)
+  COUNT(*) FILTER (WHERE case_status = 'In progress' AND target_close_date < :extract_cutoff) AS open_overdue,
   COUNT(*) FILTER (WHERE case_status = 'Closed') AS total_closed,
   COUNT(*) FILTER (WHERE case_status = 'Closed'
     AND closure_reason IN ('Noted', 'Transitioned')) AS closed_unresolved
@@ -152,16 +156,17 @@ interface Case {
   closeDate: Date | null;
   targetCloseDate: Date | null;
   durationHours: number | null;   // null if still open
-  waitHours: number;              // durationHours OR (now - openDate) in hours
+  waitHours: number;              // durationHours OR (extractCutoff - openDate); see fetchExtractCutoff()
   // Cause encoding for AJ:
-  // 0 = still open (censored), 1 = genuinely resolved, 2 = Noted/Transitioned
+  // 0 = still open (censored), 1 = closed as resolved, 2 = Noted/Transitioned
   cause: 0 | 1 | 2;
 }
 ```
 
 Duration comes from the Postgres interval string. Parsed by `parsePgInterval` in
-`src/lib/stats.ts` (REQ-02). `now()` substituted client-side at load time for open
-cases, using the fetch timestamp stored in `public/data/summary.json`.
+`src/lib/stats.ts` (REQ-02). Open cases are censored at the **extract cutoff** from
+`fetchExtractCutoff()` (latest timestamp in the data), not at load time: the city refreshes
+the extract about daily, so load time would pad every open case's wait.
 
 ---
 
@@ -206,15 +211,15 @@ The median is null for Sidewalk Repair (S ends at 0.683), which is itself the fi
 
 ### `aalenJohansen(obs: {hours: number, cause: 0|1|2}[])`
 
-Cause encoding: `0` = censored/still open, `1` = genuinely resolved,
-`2` = administratively closed (Noted, Transitioned).
+Cause encoding: `0` = censored/still open, `1` = closed as resolved,
+`2` = closed as Noted (no action required) or Transitioned (reassigned to another agency).
 
 Returns:
 ```ts
 {
-  curve1: { t: number; cif: number }[];  // cause 1: genuine resolution
+  curve1: { t: number; cif: number }[];  // cause 1: resolved closure
   curve2: { t: number; cif: number }[];  // cause 2: admin closure
-  final1: number;          // F₁(∞) — probability of genuine resolution
+  final1: number;          // F₁(∞) — probability of resolved closure
   final2: number;          // F₂(∞) — probability of admin closure
   stillUnresolved: number; // 1 - final1 - final2, must be within 1e-9 of (open cases / n)
 }
@@ -280,7 +285,7 @@ This is placed directly below the KM chart, before the confounder note.
 
 ```
 Header: "Wait Audit" + query timestamp
-StatTiles: [56,797 in cohort] [23.9% not resolved] [3.09× understatement for SLO]
+StatTiles: [56,797 in cohort] [23.9% Noted or Transitioned] [3.06× gap for SLO]
 Cohort scope note (REQ-23)
 ServicePicker
 ClosureReasonPanel   ← PRIMARY: AJ CIF + stacked bar of closure reasons
@@ -301,17 +306,17 @@ Footer
 
 Three tiles:
 1. "Cases in cohort" — 56,797, with sub-text "opened 2026-07-01 → 2026-10-24"
-2. "Closed without resolution" — 23.9% (11,701 / 48,903), with sub-text "Noted or Transitioned"
-3. "Wait understatement" — "3.09×" for Street Light Outage (updates with service picker)
+2. "Closed as Noted or Transitioned" — 23.9% (11,701 / 48,903), with sub-text "no action required, or reassigned to another agency"
+3. "Gap vs closed-only median" — "3.06×" for Street Light Outage (updates with service picker)
 
 ### `ClosureReasonPanel.tsx` (PRIMARY)
 
 Recharts horizontal stacked `BarChart`. One bar = all cohort cases for selected service.
 Segments: Resolved (green), Resolved successfully (green), Noted (amber), Transitioned (red), null/Other (slate).
 
-Below chart: AJ CIF line chart — two curves, F₁(t) genuine resolution, F₂(t) admin closure.
+Below chart: AJ CIF line chart — two curves, F₁(t) resolved closure, F₂(t) admin closure.
 
-Annotation: "23.9% of closed cases (Noted + Transitioned) were not resolved."
+Annotation: "23.9% of closed cases were closed as Noted or Transitioned rather than Resolved."
 This panel appears BEFORE the KM chart.
 
 ### `KMChart.tsx` (SUPPORTING)
@@ -360,10 +365,10 @@ are stored in `src/lib/__fixtures__/golden.json`:
   "streetLightOutage": {
     "n": 1413,
     "censored": 536,
-    "naiveMedianDays": 4.75,
-    "kmMedianDays": 14.67,
-    "ratio": 3.09,
-    "aj": { "resolved": 0.704, "adminClosed": 0.070, "unresolved": 0.226 }
+    "naiveMedianDays": 4.74,
+    "kmMedianDays": 14.50,
+    "ratio": 3.06,
+    "aj": { "resolved": 0.706, "adminClosed": 0.070, "unresolved": 0.224 }
   },
   "sidewalkRepair": {
     "n": 2561,
@@ -371,15 +376,15 @@ are stored in `src/lib/__fixtures__/golden.json`:
     "naiveMedianDays": 0.86,
     "kmMedianDays": null,
     "sFinal": 0.683,
-    "aj": { "resolved": 0.177, "adminClosed": 0.140, "unresolved": 0.683 }
+    "aj": { "resolved": 0.178, "adminClosed": 0.140, "unresolved": 0.682 }
   },
   "pothole": {
     "n": 2214,
     "censored": 485,
     "naiveMedianDays": 1.83,
-    "kmMedianDays": 3.09,
+    "kmMedianDays": 3.08,
     "ratio": 1.69,
-    "aj": { "resolved": 0.644, "adminClosed": 0.160, "unresolved": 0.196 }
+    "aj": { "resolved": 0.644, "adminClosed": 0.160, "unresolved": 0.195 }
   },
   "litterDebris": {
     "n": 9839,

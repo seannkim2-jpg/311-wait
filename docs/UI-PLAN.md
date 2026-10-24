@@ -15,14 +15,14 @@ disagree, treat this as the newer thinking and reconcile deliberately.
 
 ## 1. What the service actually does (one paragraph)
 
-Boston publishes an "on-time rate" and median closure time for 311 service requests, but those
-figures are computed **only over cases the city has already closed** — so the thousands of
-requests still open, which skew slow, are dropped from the city's own measure of its
-performance. **Wait Audit puts them back in.** It queries Boston's live open-data endpoint from
+A median closure time taken over closed cases only leaves out the thousands of 311 requests
+still open, which skew slow. (Boston publishes no 311 median, and CityScore does not document
+how its per-service on-time measures count open cases, so this is not a claim about the city's
+calculation — see `docs/research/claim-check.md`.) **Wait Audit puts the open cases back in.** It queries Boston's live open-data endpoint from
 the browser (no API key, no backend) and applies survival analysis: **Kaplan–Meier** for
 time-to-closure with still-open (censored) cases included, and **Aalen–Johansen** competing-risks
-incidence to separate requests that were genuinely *resolved* from those merely *closed*
-(`Noted` / `Transitioned`). It makes **no causal claim**: it audits the measurement, shows sample
+incidence to separate requests closed as *resolved* from those closed as `Noted` (no action
+required) or `Transitioned` (reassigned to another agency). It makes **no causal claim**: it audits the measurement, shows sample
 sizes, censoring counts, and confidence intervals, and says where the data cannot answer. The
 estimators are implemented three times independently (Kiro TypeScript, an independent Python
 reference, and `lifelines`) and agree to six decimal places.

@@ -1,9 +1,10 @@
 # Requirements: service-wait-audit
 
-Boston 311 wait-time audit. Statistically honest comparison of the city's published
-on-time rate and median closure time against Kaplan–Meier and Aalen-Johansen
-estimates that account for the 7,876 cases still open and the 11,701 closed without
-genuine resolution.
+Boston 311 wait-time audit. Statistically honest comparison of the median among closed
+cases against Kaplan–Meier and Aalen-Johansen estimates that include the 7,876 cases still
+open and separate the 11,701 closed as Noted (no action required) or Transitioned
+(reassigned to another agency). The closed-only median is ours, not a city figure; see
+docs/research/claim-check.md. Current figures: data/numbers.json.
 
 Source: `data.boston.gov` CKAN resource `254adca6-64ab-4c5c-9fc0-a6da622be185`.
 No API key. CORS-open.
@@ -108,12 +109,13 @@ the count and percentage of closed cases by `closure_reason` value. Key cohort f
 - Total cases opened since 2026-07-01: **56,797**
 - Closed: **48,903** (86.1%)
 - Still open: **7,876** (13.9%)
-- Still open AND past city target: **6,240** (10.99% of total)
-- Closed as `Noted` or `Transitioned` (not resolved): **11,701 of 48,903 = 23.9%**
+- Still open AND past city target (`target_close_date` before the extract cutoff): **6,624**
+- Closed as `Noted` or `Transitioned` (not a Resolved closure): **11,701 of 48,903 = 23.9%**
 
 "Noted" and "Transitioned" segments SHALL use a visually distinct color from
 "Resolved" and "Resolved successfully". An annotation SHALL read:
-"23.9% of closed cases were Noted or Transitioned — not resolved."
+"23.9% of closed cases were closed as Noted (no action required) or Transitioned
+(reassigned to another agency) rather than Resolved."
 
 This finding requires no statistical inference and SHALL be the first headline a user
 sees.
@@ -124,8 +126,8 @@ On first load, before any user interaction, the app SHALL display data for
 **Street Light Outage**.
 
 Rationale: shows the starkest valid contrast between naive and KM median within the
-cohort. Street Light Outage has 37.9% censoring rate, naive median 4.75 d, KM median
-14.67 d — a 3.09× understatement. Sidewalk Repair (70.2% censoring, KM never reached)
+cohort. Street Light Outage has 37.9% still open, median among closed cases 4.74 d,
+estimate including open cases 14.50 d — 3.06×, against a 14-day target. Sidewalk Repair (70.2% censoring, KM never reached)
 SHALL be featured as the case where the metric breaks entirely, surfaced via the bias
 callout copy when that service is selected.
 
@@ -227,8 +229,8 @@ would. The correct estimator is the Aalen-Johansen cumulative incidence function
 
 The AJ estimator SHALL:
 - Accept observations with `cause: 0 | 1 | 2` (0 = censored/still open,
-  1 = genuinely resolved, 2 = administratively closed / Noted+Transitioned).
-- Compute per-cause CIF curves: F₁(t) for genuine resolution, F₂(t) for admin closure.
+  1 = closed as resolved, 2 = closed as Noted or Transitioned).
+- Compute per-cause CIF curves: F₁(t) for resolved closure, F₂(t) for Noted/Transitioned.
 - Return the final incidence for each cause plus the share still unresolved
   (1 − F₁(∞) − F₂(∞)).
 - Guarantee: F₁(∞) + F₂(∞) + still_unresolved = 1.0 within 1e-9.
@@ -237,10 +239,10 @@ Cohort-wide AJ final incidences (at 115 d, used for golden-value tests):
 
 | Service           | Resolved | Admin-closed | Still unresolved |
 |-------------------|----------|--------------|-----------------|
-| Litter & Debris   | 80.1%    | 16.4%        | 3.6%            |
-| Street Light Out. | 70.4%    |  7.0%        | 22.6%           |
-| Pothole           | 64.4%    | 16.0%        | 19.6%           |
-| Sidewalk Repair   | 17.7%    | 14.0%        | 68.3%           |
+| Litter & Debris   | 80.1%    | 16.4%        | 3.5%            |
+| Street Light Out. | 70.6%    |  7.0%        | 22.4%           |
+| Pothole           | 64.4%    | 16.0%        | 19.5%           |
+| Sidewalk Repair   | 17.8%    | 14.0%        | 68.2%           |
 
 The closure-reason panel SHALL use the AJ CIF curves as its primary visual, not a
 simple count breakdown.
@@ -263,5 +265,5 @@ The following text SHALL appear on screen near the headline counts:
 > "Cohort: cases opened 2026-07-01 through 2026-10-24 (n = 56,797).
 > Max observable duration ≈ 115 days."
 
-The 6,240 overdue count SHALL be labeled "cases currently past their deadline" and
+The open-and-past-target count (6,624 at the 2026-10-24 extract) SHALL be labeled "cases currently past their deadline" and
 SHALL NOT be given a denominator or presented as a rate.
