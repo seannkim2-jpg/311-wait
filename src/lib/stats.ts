@@ -456,3 +456,48 @@ export function benjaminiHochberg(pValues: number[]): number[] {
 
   return result;
 }
+
+// ---------------------------------------------------------------------------
+// Conditional chance of closing (make-the-case, MC-05)
+// ---------------------------------------------------------------------------
+
+/**
+ * S(t) read off a Kaplan-Meier result: the survival after the last event at or before t.
+ * Right-continuous, so events exactly at t count. S(t) = 1 before the first event.
+ */
+export function survivalAt(km: KMResult, hours: number): number {
+  const curve = km.curve;
+  let lo = 0;
+  let hi = curve.length - 1;
+  let found = -1;
+  while (lo <= hi) {
+    const mid = (lo + hi) >> 1;
+    if (curve[mid].t <= hours) {
+      found = mid;
+      lo = mid + 1;
+    } else {
+      hi = mid - 1;
+    }
+  }
+  return found === -1 ? 1 : curve[found].s;
+}
+
+/**
+ * Chance that a case still open at `ageHours` closes within the next `windowHours`:
+ * 1 - S(age + window) / S(age), from the same curve the survival chart draws.
+ *
+ * Returns null where the data cannot answer: the window runs past `horizonHours` (the longest
+ * observed duration), or nothing is still open at that age (S(age) = 0).
+ */
+export function conditionalClose(
+  km: KMResult,
+  ageHours: number,
+  windowHours: number,
+  horizonHours: number,
+): number | null {
+  if (!(ageHours >= 0) || !(windowHours >= 0)) return null;
+  if (ageHours + windowHours > horizonHours) return null;
+  const sAge = survivalAt(km, ageHours);
+  if (sAge <= 0) return null;
+  return 1 - survivalAt(km, ageHours + windowHours) / sAge;
+}

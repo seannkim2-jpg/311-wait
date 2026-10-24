@@ -1,0 +1,547 @@
+{
+ "censorAtUtc": "2026-10-24T16:00:00Z",
+ "windowsDays": [
+  7,
+  14,
+  30
+ ],
+ "agesDays": [
+  0,
+  1,
+  7,
+  14,
+  30,
+  60,
+  100
+ ],
+ "services": {
+  "LitterDebris": {
+   "n": 9839,
+   "maxHours": 2760.808905,
+   "grid": [
+    {
+     "ageDays": 0,
+     "windowDays": 7,
+     "chance": 0.9582759631179276,
+     "atRisk": 9839
+    },
+    {
+     "ageDays": 0,
+     "windowDays": 14,
+     "chance": 0.961333145092887,
+     "atRisk": 9839
+    },
+    {
+     "ageDays": 0,
+     "windowDays": 30,
+     "chance": 0.9626064662124713,
+     "atRisk": 9839
+    },
+    {
+     "ageDays": 1,
+     "windowDays": 7,
+     "chance": 0.6734777692654774,
+     "atRisk": 1224
+    },
+    {
+     "ageDays": 1,
+     "windowDays": 14,
+     "chance": 0.6933835968878537,
+     "atRisk": 1224
+    },
+    {
+     "ageDays": 1,
+     "windowDays": 30,
+     "chance": 0.7024922483786751,
+     "atRisk": 1224
+    },
+    {
+     "ageDays": 7,
+     "windowDays": 7,
+     "chance": 0.07327148098349323,
+     "atRisk": 367
+    },
+    {
+     "ageDays": 7,
+     "windowDays": 14,
+     "chance": 0.09458377478170943,
+     "atRisk": 367
+    },
+    {
+     "ageDays": 7,
+     "windowDays": 30,
+     "chance": 0.10378916850215691,
+     "atRisk": 367
+    },
+    {
+     "ageDays": 14,
+     "windowDays": 7,
+     "chance": 0.022997343192625475,
+     "atRisk": 301
+    },
+    {
+     "ageDays": 14,
+     "windowDays": 14,
+     "chance": 0.03293055829451608,
+     "atRisk": 301
+    },
+    {
+     "ageDays": 14,
+     "windowDays": 30,
+     "chance": 0.03293055829451608,
+     "atRisk": 301
+    },
+    {
+     "ageDays": 30,
+     "windowDays": 7,
+     "chance": 0.0,
+     "atRisk": 187
+    },
+    {
+     "ageDays": 30,
+     "windowDays": 14,
+     "chance": 0.0,
+     "atRisk": 187
+    },
+    {
+     "ageDays": 30,
+     "windowDays": 30,
+     "chance": 0.048302990827089554,
+     "atRisk": 187
+    },
+    {
+     "ageDays": 60,
+     "windowDays": 7,
+     "chance": 0.0,
+     "atRisk": 74
+    },
+    {
+     "ageDays": 60,
+     "windowDays": 14,
+     "chance": 0.0,
+     "atRisk": 74
+    },
+    {
+     "ageDays": 60,
+     "windowDays": 30,
+     "chance": 0.0,
+     "atRisk": 74
+    },
+    {
+     "ageDays": 100,
+     "windowDays": 7,
+     "chance": 0.0,
+     "atRisk": 27
+    },
+    {
+     "ageDays": 100,
+     "windowDays": 14,
+     "chance": 0.0,
+     "atRisk": 27
+    },
+    {
+     "ageDays": 100,
+     "windowDays": 30,
+     "chance": null,
+     "atRisk": 27
+    }
+   ]
+  },
+  "Pothole": {
+   "n": 2214,
+   "maxHours": 2765.0934833677775,
+   "grid": [
+    {
+     "ageDays": 0,
+     "windowDays": 7,
+     "chance": 0.6546403585604513,
+     "atRisk": 2214
+    },
+    {
+     "ageDays": 0,
+     "windowDays": 14,
+     "chance": 0.7469213165248467,
+     "atRisk": 2214
+    },
+    {
+     "ageDays": 0,
+     "windowDays": 30,
+     "chance": 0.7871808465324569,
+     "atRisk": 2214
+    },
+    {
+     "ageDays": 1,
+     "windowDays": 7,
+     "chance": 0.541967580465743,
+     "atRisk": 1555
+    },
+    {
+     "ageDays": 1,
+     "windowDays": 14,
+     "chance": 0.6461074198630883,
+     "atRisk": 1555
+    },
+    {
+     "ageDays": 1,
+     "windowDays": 30,
+     "chance": 0.697178702717985,
+     "atRisk": 1555
+    },
+    {
+     "ageDays": 7,
+     "windowDays": 7,
+     "chance": 0.26720249528793905,
+     "atRisk": 739
+    },
+    {
+     "ageDays": 7,
+     "windowDays": 14,
+     "chance": 0.35103981953627506,
+     "atRisk": 739
+    },
+    {
+     "ageDays": 7,
+     "windowDays": 30,
+     "chance": 0.39041751618630793,
+     "atRisk": 739
+    },
+    {
+     "ageDays": 14,
+     "windowDays": 7,
+     "chance": 0.1144072185143129,
+     "atRisk": 523
+    },
+    {
+     "ageDays": 14,
+     "windowDays": 14,
+     "chance": 0.15687773960114482,
+     "atRisk": 523
+    },
+    {
+     "ageDays": 14,
+     "windowDays": 30,
+     "chance": 0.17786758875131614,
+     "atRisk": 523
+    },
+    {
+     "ageDays": 30,
+     "windowDays": 7,
+     "chance": 0.01077894255493661,
+     "atRisk": 380
+    },
+    {
+     "ageDays": 30,
+     "windowDays": 14,
+     "chance": 0.022342750213025342,
+     "atRisk": 380
+    },
+    {
+     "ageDays": 30,
+     "windowDays": 30,
+     "chance": 0.03817494293995516,
+     "atRisk": 380
+    },
+    {
+     "ageDays": 60,
+     "windowDays": 7,
+     "chance": 0.0,
+     "atRisk": 245
+    },
+    {
+     "ageDays": 60,
+     "windowDays": 14,
+     "chance": 0.005102040816326481,
+     "atRisk": 245
+    },
+    {
+     "ageDays": 60,
+     "windowDays": 30,
+     "chance": 0.011281531246038812,
+     "atRisk": 245
+    },
+    {
+     "ageDays": 100,
+     "windowDays": 7,
+     "chance": 0.01851851851851849,
+     "atRisk": 71
+    },
+    {
+     "ageDays": 100,
+     "windowDays": 14,
+     "chance": 0.01851851851851849,
+     "atRisk": 71
+    },
+    {
+     "ageDays": 100,
+     "windowDays": 30,
+     "chance": null,
+     "atRisk": 71
+    }
+   ]
+  },
+  "SidewalkRepair": {
+   "n": 2561,
+   "maxHours": 2774.8380496416667,
+   "grid": [
+    {
+     "ageDays": 0,
+     "windowDays": 7,
+     "chance": 0.26229217765850177,
+     "atRisk": 2561
+    },
+    {
+     "ageDays": 0,
+     "windowDays": 14,
+     "chance": 0.2823719147936077,
+     "atRisk": 2561
+    },
+    {
+     "ageDays": 0,
+     "windowDays": 30,
+     "chance": 0.29191884743716845,
+     "atRisk": 2561
+    },
+    {
+     "ageDays": 1,
+     "windowDays": 7,
+     "chance": 0.11605606051717265,
+     "atRisk": 2116
+    },
+    {
+     "ageDays": 1,
+     "windowDays": 14,
+     "chance": 0.13593594561548938,
+     "atRisk": 2116
+    },
+    {
+     "ageDays": 1,
+     "windowDays": 30,
+     "chance": 0.14597447689473508,
+     "atRisk": 2116
+    },
+    {
+     "ageDays": 7,
+     "windowDays": 7,
+     "chance": 0.027219092067334305,
+     "atRisk": 1800
+    },
+    {
+     "ageDays": 7,
+     "windowDays": 14,
+     "chance": 0.03686938706590048,
+     "atRisk": 1800
+    },
+    {
+     "ageDays": 7,
+     "windowDays": 30,
+     "chance": 0.04439444432884576,
+     "atRisk": 1800
+    },
+    {
+     "ageDays": 14,
+     "windowDays": 7,
+     "chance": 0.00992031702089513,
+     "atRisk": 1665
+    },
+    {
+     "ageDays": 14,
+     "windowDays": 14,
+     "chance": 0.011918617332598802,
+     "atRisk": 1665
+    },
+    {
+     "ageDays": 14,
+     "windowDays": 30,
+     "chance": 0.021689406913787734,
+     "atRisk": 1665
+    },
+    {
+     "ageDays": 30,
+     "windowDays": 7,
+     "chance": 0.004411159737724879,
+     "atRisk": 1413
+    },
+    {
+     "ageDays": 30,
+     "windowDays": 14,
+     "chance": 0.008499018632908806,
+     "atRisk": 1413
+    },
+    {
+     "ageDays": 30,
+     "windowDays": 30,
+     "chance": 0.016106724445453247,
+     "atRisk": 1413
+    },
+    {
+     "ageDays": 60,
+     "windowDays": 7,
+     "chance": 0.0023367708858288427,
+     "atRisk": 892
+    },
+    {
+     "ageDays": 60,
+     "windowDays": 14,
+     "chance": 0.003668764516154832,
+     "atRisk": 892
+    },
+    {
+     "ageDays": 60,
+     "windowDays": 30,
+     "chance": 0.008150786305178181,
+     "atRisk": 892
+    },
+    {
+     "ageDays": 100,
+     "windowDays": 7,
+     "chance": 0.007518796992481369,
+     "atRisk": 206
+    },
+    {
+     "ageDays": 100,
+     "windowDays": 14,
+     "chance": 0.007518796992481369,
+     "atRisk": 206
+    },
+    {
+     "ageDays": 100,
+     "windowDays": 30,
+     "chance": null,
+     "atRisk": 206
+    }
+   ]
+  },
+  "StreetLightOutage": {
+   "n": 1413,
+   "maxHours": 2754.4053662327774,
+   "grid": [
+    {
+     "ageDays": 0,
+     "windowDays": 7,
+     "chance": 0.37425141387657224,
+     "atRisk": 1413
+    },
+    {
+     "ageDays": 0,
+     "windowDays": 14,
+     "chance": 0.49255994330814556,
+     "atRisk": 1413
+    },
+    {
+     "ageDays": 0,
+     "windowDays": 30,
+     "chance": 0.6250427034926505,
+     "atRisk": 1413
+    },
+    {
+     "ageDays": 1,
+     "windowDays": 7,
+     "chance": 0.25299978147534297,
+     "atRisk": 1133
+    },
+    {
+     "ageDays": 1,
+     "windowDays": 14,
+     "chance": 0.38902870241837517,
+     "atRisk": 1133
+    },
+    {
+     "ageDays": 1,
+     "windowDays": 30,
+     "chance": 0.544441182175159,
+     "atRisk": 1133
+    },
+    {
+     "ageDays": 7,
+     "windowDays": 7,
+     "chance": 0.18906719416580064,
+     "atRisk": 794
+    },
+    {
+     "ageDays": 7,
+     "windowDays": 14,
+     "chance": 0.2969247040884503,
+     "atRisk": 794
+    },
+    {
+     "ageDays": 7,
+     "windowDays": 30,
+     "chance": 0.4571650473987853,
+     "atRisk": 794
+    },
+    {
+     "ageDays": 14,
+     "windowDays": 7,
+     "chance": 0.1330042503480885,
+     "atRisk": 572
+    },
+    {
+     "ageDays": 14,
+     "windowDays": 14,
+     "chance": 0.245094339074022,
+     "atRisk": 572
+    },
+    {
+     "ageDays": 14,
+     "windowDays": 30,
+     "chance": 0.37099324130952316,
+     "atRisk": 572
+    },
+    {
+     "ageDays": 30,
+     "windowDays": 7,
+     "chance": 0.09408829418010811,
+     "atRisk": 321
+    },
+    {
+     "ageDays": 30,
+     "windowDays": 14,
+     "chance": 0.14874779538208338,
+     "atRisk": 321
+    },
+    {
+     "ageDays": 30,
+     "windowDays": 30,
+     "chance": 0.2564285544706243,
+     "atRisk": 321
+    },
+    {
+     "ageDays": 60,
+     "windowDays": 7,
+     "chance": 0.04591885888097835,
+     "atRisk": 139
+    },
+    {
+     "ageDays": 60,
+     "windowDays": 14,
+     "chance": 0.08192192080999794,
+     "atRisk": 139
+    },
+    {
+     "ageDays": 60,
+     "windowDays": 30,
+     "chance": 0.18941855608755265,
+     "atRisk": 139
+    },
+    {
+     "ageDays": 100,
+     "windowDays": 7,
+     "chance": 0.0,
+     "atRisk": 31
+    },
+    {
+     "ageDays": 100,
+     "windowDays": 14,
+     "chance": 0.0,
+     "atRisk": 31
+    },
+    {
+     "ageDays": 100,
+     "windowDays": 30,
+     "chance": null,
+     "atRisk": 31
+    }
+   ]
+  }
+ }
+}
