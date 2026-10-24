@@ -69,12 +69,16 @@ another Git checkout too, pass both paths: `./scripts/check-with-kiro.sh . /path
 
 ## Running it
 
-_Clone-to-running instructions. A judge must get this working for free, from scratch._
+Install dependencies and start the local site:
 
 ```bash
 git clone https://github.com/seannkim2-jpg/kiro-hackachusetts.git
 cd kiro-hackachusetts
+npm ci
+npm run dev
 ```
+
+Open the local URL printed by Vite.
 
 ## Built with Kiro
 
