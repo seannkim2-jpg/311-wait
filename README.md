@@ -26,6 +26,14 @@ than `Resolved`.
 It makes no causal claim about why. It audits the measurement, shows its sample sizes,
 censoring counts and confidence intervals, and says where the data cannot answer.
 
+**Already waiting?** If your request has been open *N* days, the page shows the historical
+chance it closes in the next 7, from the same live Kaplan–Meier curve. We also trained a Cox
+model offline to see whether neighborhood sharpens that figure, and tested it on later
+requests. It did not: the Brier score improved by 1.3% where 5% was required, and the
+neighborhood terms themselves contributed 0.2%. So the neighborhood control stays off. The
+static artifact records that decision, and the page reads it from there
+([details](docs/ANALYSIS.md#closure-forecast)).
+
 - [`docs/ANALYSIS.md`](docs/ANALYSIS.md) — method, results, limitations
 - [`docs/research/NUMBERS.md`](docs/research/NUMBERS.md) / [`data/numbers.json`](data/numbers.json) — every current figure, generated
 - [`docs/research/claim-check.md`](docs/research/claim-check.md) — what the city does and doesn't document
@@ -55,10 +63,16 @@ The estimators were implemented three times independently and agree to six decim
 ```bash
 python3 -m pip install lifelines
 python3 scripts/refresh_numbers.py                 # re-pull every figure, self-check, lint the docs' claims
-npm install && npm test                            # 18 tests, incl. 12 fast-check properties
+npm install && npm test                            # 134 tests, incl. 15 fast-check properties
 ./scripts/fetch_cohort_cases.sh                    # rebuild fixtures from live data, no key
 python3 scripts/validate_against_lifelines.py      # third opinion vs the standard library
+python3 scripts/train_closure_forecast.py          # train, test and gate the closure forecast; rewrite its artifact
 ```
+
+The forecast script writes `public/model/boston-closure-forecast.json` (parameters and counts
+only, no case records), `data/forecast_evaluation.json` and the parity fixture that
+`src/lib/closureForecast.test.ts` checks. Retrain at least every 30 days: after that, the page
+treats the model as stale and stops using it.
 
 ## Checking this repository with Kiro CLI
 

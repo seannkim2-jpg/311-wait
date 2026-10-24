@@ -8,7 +8,8 @@ import {
   unitLabel,
   waitDigits,
 } from '../data/format'
-import { useCountUp } from '../hooks/motion'
+import { useAfterFirstFrame, useCountUp } from '../hooks/motion'
+import { AlreadyWaiting } from './AlreadyWaiting'
 import { ServicePicker } from './ServicePicker'
 
 interface Props {
@@ -34,14 +35,15 @@ export function Hero({ overview, audit, selected, loading, onSelect }: Props) {
       <div className="max-w-[46rem]">
         {overview ? (
           <>
+            {/* First load only: headline, lede and picker arrive in a short stagger. */}
             <h1
               id="headline"
-              className="font-display text-[clamp(2rem,4.6vw,3.4rem)] font-bold leading-[1.02] tracking-[-0.035em]"
+              className="animate-rise-in font-display text-[clamp(2rem,4.6vw,3.4rem)] font-bold leading-[1.02] tracking-[-0.035em]"
             >
               {oneIn(overview.closedUnresolved / overview.closed)} closed Boston 311 cases ended as
               Noted or Transitioned rather than Resolved.
             </h1>
-            <p className="mt-4 text-lg leading-relaxed text-ink-2">
+            <p className="animate-rise-in mt-4 text-lg leading-relaxed text-ink-2" style={{ animationDelay: '70ms' }}>
               <span className="figure font-semibold text-ink">
                 {formatPct(overview.closedUnresolved / overview.closed)}
               </span>{' '}
@@ -61,7 +63,7 @@ export function Hero({ overview, audit, selected, loading, onSelect }: Props) {
         )}
       </div>
 
-      <div className="mt-8">
+      <div className={overview ? 'animate-rise-in mt-8' : 'mt-8'} style={overview ? { animationDelay: '140ms' } : undefined}>
         {overview ? (
           <ServicePicker
             services={overview.services}
@@ -81,6 +83,8 @@ export function Hero({ overview, audit, selected, loading, onSelect }: Props) {
       <div className="mt-12 border-t border-rule pt-10">
         {audit ? <Answer audit={audit} /> : <AnswerSkeleton />}
       </div>
+
+      {audit && <AlreadyWaiting audit={audit} />}
 
       {overview && (
         <p className="mt-10 max-w-[70ch] text-sm leading-relaxed text-ink-3">
@@ -181,19 +185,20 @@ function Answer({ audit }: { audit: ServiceAudit }) {
         </p>
       </div>
 
-      <dl className="col-span-full grid grid-cols-2 gap-x-8 gap-y-4 border-t border-rule pt-6 text-[0.9375rem] sm:grid-cols-4">
-        <Stat term="Requests" value={formatInt(audit.n)} />
-        <Stat term="Still open" value={formatInt(audit.stillOpen)} note="counted as censored" />
-        <Stat term="Closed as resolved" value={`${resolvedIn100} in 100`} />
-        <Stat term="Noted or Transitioned" value={`${notResolvedIn100} in 100`} note="no action required, or sent to another agency" />
+      {/* Keyed by service so a new pick restaggers the figures it just changed. */}
+      <dl key={audit.service} className="col-span-full grid grid-cols-2 gap-x-8 gap-y-4 border-t border-rule pt-6 text-[0.9375rem] sm:grid-cols-4">
+        <Stat term="Requests" value={formatInt(audit.n)} index={0} />
+        <Stat term="Still open" value={formatInt(audit.stillOpen)} note="counted as censored" index={1} />
+        <Stat term="Closed as resolved" value={`${resolvedIn100} in 100`} index={2} />
+        <Stat term="Noted or Transitioned" value={`${notResolvedIn100} in 100`} note="no action required, or sent to another agency" index={3} />
       </dl>
     </div>
   )
 }
 
-function Stat({ term, value, note }: { term: string; value: string; note?: string }) {
+function Stat({ term, value, note, index }: { term: string; value: string; note?: string; index: number }) {
   return (
-    <div>
+    <div className="animate-rise-in" style={{ animationDelay: `${300 + index * 50}ms` }}>
       <dt className="text-ink-3">{term}</dt>
       <dd className="figure mt-1 text-lg font-semibold text-ink">
         {value}
@@ -220,8 +225,10 @@ function CompareBar({
   openEnded?: boolean
   delay: number
 }) {
-  // A floor keeps a tiny value visible as a sliver rather than vanishing.
-  const scale = Math.max(0.015, Math.min(1, share))
+  // A floor keeps a tiny value visible as a sliver rather than vanishing. A transition does not
+  // run on mount, so on first paint the bar sits at the floor and then grows to its value.
+  const ready = useAfterFirstFrame()
+  const scale = ready ? Math.max(0.015, Math.min(1, share)) : 0.015
   return (
     <li>
       <div className="flex items-baseline justify-between gap-4">

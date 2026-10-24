@@ -14,7 +14,7 @@ import {
   type CohortTotals,
   type ServiceCount,
 } from '../lib/boston311'
-import { aalenJohansen, kaplanMeier, naiveMedian, wilson } from '../lib/stats'
+import { aalenJohansen, kaplanMeier, naiveMedian, wilson, type KMStep } from '../lib/stats'
 
 const HOURS_PER_DAY = 24
 
@@ -56,6 +56,10 @@ export interface ServiceAudit {
   kmEnd: number
   maxDay: number
   curve: CurvePoint[]
+  /** The Kaplan–Meier steps themselves, for the "Already waiting?" estimate. */
+  kmSteps: KMStep[]
+  /** Every observed duration in hours, ascending: who was still open after a given wait. */
+  sortedHours: Float64Array
   outcomes: { resolved: number; notResolved: number; stillOpen: number }
   neighborhoods: NeighborhoodRow[]
 }
@@ -176,6 +180,8 @@ async function buildServiceAudit(service: string): Promise<ServiceAudit> {
     kmEnd: km.curve.length ? km.curve[km.curve.length - 1].s : 1,
     maxDay,
     curve,
+    kmSteps: km.curve,
+    sortedHours: Float64Array.from(obs, (o) => o.hours).sort(),
     outcomes: { resolved: aj.final1, notResolved: aj.final2, stillOpen: aj.stillUnresolved },
     neighborhoods,
   }

@@ -23,6 +23,16 @@ and output.
   then built it. It checked its own work in a headless browser using the Playwright power:
   screenshots at desktop and phone widths, axe-core with 0 violations, and scripted keyboard
   walkthroughs of the picker.
+- **Kiro Web (Vibe mode), 2026-10-24, closure forecast.** From the team's written plan, Kiro
+  wrote `.kiro/specs/closure-forecast/`. It fixed the release gate in the spec and in
+  `scripts/train_closure_forecast.py` before running anything, trained and tested the model
+  in lifelines, and built the TypeScript reader, its parity tests and the "Already waiting?"
+  block. The model did not pass, and Kiro kept it off the page as the plan required. It added
+  an ablation showing that the gains at 14 and 30 days came from the estimator form, not from
+  neighborhood. Its first run looked like a disaster (Brier score +115%); the cause was that
+  lifelines returns a stratified model's predictions grouped by stratum, not in row order.
+  The script now evaluates the baseline as a step function itself and checks the result
+  against lifelines' own predictions.
 
 ## Skills
 

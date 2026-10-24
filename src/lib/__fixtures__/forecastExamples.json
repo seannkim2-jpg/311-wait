@@ -1,0 +1,609 @@
+{
+ "_comment": "Written by scripts/train_closure_forecast.py. 'cox' rows come from the fitted lifelines model (its Breslow baseline and partial hazards, checked against predict_survival_function), not from the exported arrays; 'km' rows from lifelines KaplanMeierFitter on cohortCases.json, censored at queryTime. closureForecast.test.ts must reproduce both.",
+ "artifactTrainedAtUtc": "2026-10-24T20:46:31Z",
+ "queryTime": "2026-10-24T16:00:00Z",
+ "cox": [
+  {
+   "service": "Litter & Debris",
+   "neighborhood": "Dorchester",
+   "daysWaited": 0,
+   "p": 0.9651639034998514
+  },
+  {
+   "service": "Litter & Debris",
+   "neighborhood": "South End",
+   "daysWaited": 0,
+   "p": 0.9644983838139005
+  },
+  {
+   "service": "Litter & Debris",
+   "neighborhood": "Roxbury",
+   "daysWaited": 0,
+   "p": 0.9637156439930431
+  },
+  {
+   "service": "Litter & Debris",
+   "neighborhood": "Back Bay",
+   "daysWaited": 0,
+   "p": 0.9574672651990062
+  },
+  {
+   "service": "Litter & Debris",
+   "neighborhood": "Dorchester",
+   "daysWaited": 3,
+   "p": 0.2459272877518106
+  },
+  {
+   "service": "Litter & Debris",
+   "neighborhood": "South End",
+   "daysWaited": 3,
+   "p": 0.244726491610883
+  },
+  {
+   "service": "Litter & Debris",
+   "neighborhood": "Roxbury",
+   "daysWaited": 3,
+   "p": 0.24334030271342388
+  },
+  {
+   "service": "Litter & Debris",
+   "neighborhood": "Back Bay",
+   "daysWaited": 3,
+   "p": 0.23316402611072973
+  },
+  {
+   "service": "Litter & Debris",
+   "neighborhood": "Dorchester",
+   "daysWaited": 14,
+   "p": 0.02453802750095302
+  },
+  {
+   "service": "Litter & Debris",
+   "neighborhood": "South End",
+   "daysWaited": 14,
+   "p": 0.02440140719484485
+  },
+  {
+   "service": "Litter & Debris",
+   "neighborhood": "Roxbury",
+   "daysWaited": 14,
+   "p": 0.024243939982209528
+  },
+  {
+   "service": "Litter & Debris",
+   "neighborhood": "Back Bay",
+   "daysWaited": 14,
+   "p": 0.023095932427761756
+  },
+  {
+   "service": "Litter & Debris",
+   "neighborhood": "Dorchester",
+   "daysWaited": 30,
+   "p": 0.0
+  },
+  {
+   "service": "Litter & Debris",
+   "neighborhood": "South End",
+   "daysWaited": 30,
+   "p": 0.0
+  },
+  {
+   "service": "Litter & Debris",
+   "neighborhood": "Roxbury",
+   "daysWaited": 30,
+   "p": 0.0
+  },
+  {
+   "service": "Litter & Debris",
+   "neighborhood": "Back Bay",
+   "daysWaited": 30,
+   "p": 0.0
+  },
+  {
+   "service": "Litter & Debris",
+   "neighborhood": "Dorchester",
+   "daysWaited": 60,
+   "p": 0.0
+  },
+  {
+   "service": "Litter & Debris",
+   "neighborhood": "South End",
+   "daysWaited": 60,
+   "p": 0.0
+  },
+  {
+   "service": "Litter & Debris",
+   "neighborhood": "Roxbury",
+   "daysWaited": 60,
+   "p": 0.0
+  },
+  {
+   "service": "Litter & Debris",
+   "neighborhood": "Back Bay",
+   "daysWaited": 60,
+   "p": 0.0
+  },
+  {
+   "service": "Pothole",
+   "neighborhood": "Dorchester",
+   "daysWaited": 0,
+   "p": 0.6790254786939229
+  },
+  {
+   "service": "Pothole",
+   "neighborhood": "South End",
+   "daysWaited": 0,
+   "p": 0.6769627492412466
+  },
+  {
+   "service": "Pothole",
+   "neighborhood": "Roxbury",
+   "daysWaited": 0,
+   "p": 0.6745691799594533
+  },
+  {
+   "service": "Pothole",
+   "neighborhood": "Back Bay",
+   "daysWaited": 0,
+   "p": 0.6565869451835019
+  },
+  {
+   "service": "Pothole",
+   "neighborhood": "Dorchester",
+   "daysWaited": 3,
+   "p": 0.4375267915952086
+  },
+  {
+   "service": "Pothole",
+   "neighborhood": "South End",
+   "daysWaited": 3,
+   "p": 0.435699380273985
+  },
+  {
+   "service": "Pothole",
+   "neighborhood": "Roxbury",
+   "daysWaited": 3,
+   "p": 0.43358607692068385
+  },
+  {
+   "service": "Pothole",
+   "neighborhood": "Back Bay",
+   "daysWaited": 3,
+   "p": 0.4179486752240842
+  },
+  {
+   "service": "Pothole",
+   "neighborhood": "Dorchester",
+   "daysWaited": 14,
+   "p": 0.12203265998043134
+  },
+  {
+   "service": "Pothole",
+   "neighborhood": "South End",
+   "daysWaited": 14,
+   "p": 0.12138831372735093
+  },
+  {
+   "service": "Pothole",
+   "neighborhood": "Roxbury",
+   "daysWaited": 14,
+   "p": 0.12064517202081337
+  },
+  {
+   "service": "Pothole",
+   "neighborhood": "Back Bay",
+   "daysWaited": 14,
+   "p": 0.11521194751069963
+  },
+  {
+   "service": "Pothole",
+   "neighborhood": "Dorchester",
+   "daysWaited": 30,
+   "p": 0.011514059650554853
+  },
+  {
+   "service": "Pothole",
+   "neighborhood": "South End",
+   "daysWaited": 30,
+   "p": 0.01144952742195604
+  },
+  {
+   "service": "Pothole",
+   "neighborhood": "Roxbury",
+   "daysWaited": 30,
+   "p": 0.011375154198536297
+  },
+  {
+   "service": "Pothole",
+   "neighborhood": "Back Bay",
+   "daysWaited": 30,
+   "p": 0.01083313312571521
+  },
+  {
+   "service": "Pothole",
+   "neighborhood": "Dorchester",
+   "daysWaited": 60,
+   "p": 0.0
+  },
+  {
+   "service": "Pothole",
+   "neighborhood": "South End",
+   "daysWaited": 60,
+   "p": 0.0
+  },
+  {
+   "service": "Pothole",
+   "neighborhood": "Roxbury",
+   "daysWaited": 60,
+   "p": 0.0
+  },
+  {
+   "service": "Pothole",
+   "neighborhood": "Back Bay",
+   "daysWaited": 60,
+   "p": 0.0
+  },
+  {
+   "service": "Street Light Outage",
+   "neighborhood": "Dorchester",
+   "daysWaited": 0,
+   "p": 0.3901650639628049
+  },
+  {
+   "service": "Street Light Outage",
+   "neighborhood": "South End",
+   "daysWaited": 0,
+   "p": 0.38846253655824914
+  },
+  {
+   "service": "Street Light Outage",
+   "neighborhood": "Roxbury",
+   "daysWaited": 0,
+   "p": 0.3864946202545373
+  },
+  {
+   "service": "Street Light Outage",
+   "neighborhood": "Back Bay",
+   "daysWaited": 0,
+   "p": 0.37196477380727844
+  },
+  {
+   "service": "Street Light Outage",
+   "neighborhood": "Dorchester",
+   "daysWaited": 3,
+   "p": 0.22917174232863835
+  },
+  {
+   "service": "Street Light Outage",
+   "neighborhood": "South End",
+   "daysWaited": 3,
+   "p": 0.2280399039294162
+  },
+  {
+   "service": "Street Light Outage",
+   "neighborhood": "Roxbury",
+   "daysWaited": 3,
+   "p": 0.22673349346076266
+  },
+  {
+   "service": "Street Light Outage",
+   "neighborhood": "Back Bay",
+   "daysWaited": 3,
+   "p": 0.21714856664582471
+  },
+  {
+   "service": "Street Light Outage",
+   "neighborhood": "Dorchester",
+   "daysWaited": 14,
+   "p": 0.13963137449658913
+  },
+  {
+   "service": "Street Light Outage",
+   "neighborhood": "South End",
+   "daysWaited": 14,
+   "p": 0.13890166268643034
+  },
+  {
+   "service": "Street Light Outage",
+   "neighborhood": "Roxbury",
+   "daysWaited": 14,
+   "p": 0.13805996321775715
+  },
+  {
+   "service": "Street Light Outage",
+   "neighborhood": "Back Bay",
+   "daysWaited": 14,
+   "p": 0.13190281004868543
+  },
+  {
+   "service": "Street Light Outage",
+   "neighborhood": "Dorchester",
+   "daysWaited": 30,
+   "p": 0.09849483220647559
+  },
+  {
+   "service": "Street Light Outage",
+   "neighborhood": "South End",
+   "daysWaited": 30,
+   "p": 0.09796774662302554
+  },
+  {
+   "service": "Street Light Outage",
+   "neighborhood": "Roxbury",
+   "daysWaited": 30,
+   "p": 0.09735994233465395
+  },
+  {
+   "service": "Street Light Outage",
+   "neighborhood": "Back Bay",
+   "daysWaited": 30,
+   "p": 0.0929193560920234
+  },
+  {
+   "service": "Street Light Outage",
+   "neighborhood": "Dorchester",
+   "daysWaited": 60,
+   "p": 0.04764561786628041
+  },
+  {
+   "service": "Street Light Outage",
+   "neighborhood": "South End",
+   "daysWaited": 60,
+   "p": 0.04738350394950841
+  },
+  {
+   "service": "Street Light Outage",
+   "neighborhood": "Roxbury",
+   "daysWaited": 60,
+   "p": 0.04708135010064385
+  },
+  {
+   "service": "Street Light Outage",
+   "neighborhood": "Back Bay",
+   "daysWaited": 60,
+   "p": 0.04487708911937438
+  },
+  {
+   "service": "Sidewalk Repair",
+   "neighborhood": "Dorchester",
+   "daysWaited": 0,
+   "p": 0.27451164884320844
+  },
+  {
+   "service": "Sidewalk Repair",
+   "neighborhood": "South End",
+   "daysWaited": 0,
+   "p": 0.27319806403657054
+  },
+  {
+   "service": "Sidewalk Repair",
+   "neighborhood": "Roxbury",
+   "daysWaited": 0,
+   "p": 0.2716813173024232
+  },
+  {
+   "service": "Sidewalk Repair",
+   "neighborhood": "Back Bay",
+   "daysWaited": 0,
+   "p": 0.26053498083593074
+  },
+  {
+   "service": "Sidewalk Repair",
+   "neighborhood": "Dorchester",
+   "daysWaited": 3,
+   "p": 0.05701484973608495
+  },
+  {
+   "service": "Sidewalk Repair",
+   "neighborhood": "South End",
+   "daysWaited": 3,
+   "p": 0.056702744465539356
+  },
+  {
+   "service": "Sidewalk Repair",
+   "neighborhood": "Roxbury",
+   "daysWaited": 3,
+   "p": 0.056342941116091616
+  },
+  {
+   "service": "Sidewalk Repair",
+   "neighborhood": "Back Bay",
+   "daysWaited": 3,
+   "p": 0.05371741899671234
+  },
+  {
+   "service": "Sidewalk Repair",
+   "neighborhood": "Dorchester",
+   "daysWaited": 14,
+   "p": 0.010469881810537207
+  },
+  {
+   "service": "Sidewalk Repair",
+   "neighborhood": "South End",
+   "daysWaited": 14,
+   "p": 0.010411170961887373
+  },
+  {
+   "service": "Sidewalk Repair",
+   "neighborhood": "Roxbury",
+   "daysWaited": 14,
+   "p": 0.010343507296910581
+  },
+  {
+   "service": "Sidewalk Repair",
+   "neighborhood": "Back Bay",
+   "daysWaited": 14,
+   "p": 0.009850398507827873
+  },
+  {
+   "service": "Sidewalk Repair",
+   "neighborhood": "Dorchester",
+   "daysWaited": 30,
+   "p": 0.004658907327194206
+  },
+  {
+   "service": "Sidewalk Repair",
+   "neighborhood": "South End",
+   "daysWaited": 30,
+   "p": 0.004632705803244153
+  },
+  {
+   "service": "Sidewalk Repair",
+   "neighborhood": "Roxbury",
+   "daysWaited": 30,
+   "p": 0.004602509881980632
+  },
+  {
+   "service": "Sidewalk Repair",
+   "neighborhood": "Back Bay",
+   "daysWaited": 30,
+   "p": 0.004382487394435697
+  },
+  {
+   "service": "Sidewalk Repair",
+   "neighborhood": "Dorchester",
+   "daysWaited": 60,
+   "p": 0.002487247553757954
+  },
+  {
+   "service": "Sidewalk Repair",
+   "neighborhood": "South End",
+   "daysWaited": 60,
+   "p": 0.0024732441900733315
+  },
+  {
+   "service": "Sidewalk Repair",
+   "neighborhood": "Roxbury",
+   "daysWaited": 60,
+   "p": 0.002457106240339124
+  },
+  {
+   "service": "Sidewalk Repair",
+   "neighborhood": "Back Bay",
+   "daysWaited": 60,
+   "p": 0.002339524016242045
+  }
+ ],
+ "km": [
+  {
+   "fixture": "LitterDebris",
+   "daysWaited": 0,
+   "p": 0.9582759631179268,
+   "atRisk": 9839
+  },
+  {
+   "fixture": "LitterDebris",
+   "daysWaited": 7,
+   "p": 0.07327148098349456,
+   "atRisk": 367
+  },
+  {
+   "fixture": "LitterDebris",
+   "daysWaited": 14,
+   "p": 0.022997343192625475,
+   "atRisk": 301
+  },
+  {
+   "fixture": "LitterDebris",
+   "daysWaited": 30,
+   "p": 0.0,
+   "atRisk": 187
+  },
+  {
+   "fixture": "LitterDebris",
+   "daysWaited": 60,
+   "p": 0.0,
+   "atRisk": 74
+  },
+  {
+   "fixture": "Pothole",
+   "daysWaited": 0,
+   "p": 0.654640358560448,
+   "atRisk": 2214
+  },
+  {
+   "fixture": "Pothole",
+   "daysWaited": 7,
+   "p": 0.2672024952879367,
+   "atRisk": 739
+  },
+  {
+   "fixture": "Pothole",
+   "daysWaited": 14,
+   "p": 0.11440721851431179,
+   "atRisk": 523
+  },
+  {
+   "fixture": "Pothole",
+   "daysWaited": 30,
+   "p": 0.010778942554937276,
+   "atRisk": 380
+  },
+  {
+   "fixture": "Pothole",
+   "daysWaited": 60,
+   "p": 0.0,
+   "atRisk": 245
+  },
+  {
+   "fixture": "SidewalkRepair",
+   "daysWaited": 0,
+   "p": 0.2622921776585001,
+   "atRisk": 2561
+  },
+  {
+   "fixture": "SidewalkRepair",
+   "daysWaited": 7,
+   "p": 0.027219092067336192,
+   "atRisk": 1800
+  },
+  {
+   "fixture": "SidewalkRepair",
+   "daysWaited": 14,
+   "p": 0.009920317020896907,
+   "atRisk": 1665
+  },
+  {
+   "fixture": "SidewalkRepair",
+   "daysWaited": 30,
+   "p": 0.004411159737723991,
+   "atRisk": 1413
+  },
+  {
+   "fixture": "SidewalkRepair",
+   "daysWaited": 60,
+   "p": 0.0023367708858286207,
+   "atRisk": 892
+  },
+  {
+   "fixture": "StreetLightOutage",
+   "daysWaited": 0,
+   "p": 0.37425141387657224,
+   "atRisk": 1413
+  },
+  {
+   "fixture": "StreetLightOutage",
+   "daysWaited": 7,
+   "p": 0.18906719416580386,
+   "atRisk": 794
+  },
+  {
+   "fixture": "StreetLightOutage",
+   "daysWaited": 14,
+   "p": 0.13300425034808772,
+   "atRisk": 572
+  },
+  {
+   "fixture": "StreetLightOutage",
+   "daysWaited": 30,
+   "p": 0.09408829418010878,
+   "atRisk": 321
+  },
+  {
+   "fixture": "StreetLightOutage",
+   "daysWaited": 60,
+   "p": 0.04591885888097791,
+   "atRisk": 139
+  }
+ ]
+}
